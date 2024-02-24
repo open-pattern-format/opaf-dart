@@ -272,67 +272,188 @@ class OPAFCompiler {
       )
     );
 
-    int repeat = node.getAttribute('repeat') == null ? 1 :
+    int count = node.getAttribute('count') == null ? 0 :
     OPAFUtils.strToNum(
       OPAFUtils.evaluateExpr(
-        node.getAttribute('repeat'),
+        node.getAttribute('count'),
         values
       )
     ).round();
+  
+    int offset = node.getAttribute('offset') == null ? 0 :
+    OPAFUtils.strToNum(
+      OPAFUtils.evaluateExpr(
+        node.getAttribute('offset'),
+        values
+      )
+    ).round();
+  
+    // Check row number has been specified
+    if (rowNum == 0) {
+      print("opaf:chart received an invalid or missing 'row' attribute");
+      throw OPAFInvalidException();
+    }
+
+    // Check stitch count is valid
+    if (count == 0) {
+      print("opaf:chart received an invalid or missing 'count' attribute.");
+      throw OPAFInvalidException();
+    }
+
+    // Parse rows
+    List<XmlElement> rows = [];
+
+    for (var r in chart.rows) {
+      var rNode = XmlDocumentFragment.parse(r);
+
+      if (OPAFUtils.evaluateNodeCondition(rNode.firstElementChild as XmlElement, values)) {
+        rows.add(rNode.firstElementChild as XmlElement);
+      }
+    }
+
+    // Get row and actions
+    if (rowNum > rows.length) {
+      print("opaf:chart - row specified is invalid.");
+      throw OPAFInvalidException();
+    }
+
+    var row = rows[rowNum - 1];
+    List<XmlElement> rowActions = [];
+
+    for (var a in row.findAllElements('opaf:action')) {
+      if (a.getAttribute('name') == 'none') {
+        continue;
+      }
+
+      if (OPAFUtils.evaluateNodeCondition(a, values)) {
+        rowActions.add(a);
+      }
+    }
+
+    if (rowActions.isEmpty) {
+      print("opaf:chart - no actions found for specified row");
+      throw OPAFInvalidException();
+    }
+
+    // Processed actions
+    List<XmlElement> pActions = [];
+    int rowCount = 0;
+
+    for (var a in rowActions) {
+      var pNodes = processNode(a, values);
+
+      for (var pn in pNodes) {
+        rowCount += int.parse(pn.getAttribute('total') as String);
+        pActions.add(pn);
+      }
+    }
+
+    if (offset > rowCount) {
+      print("opaf:chart - offset is greater than requested row stitch count");
+    }
 
     List<XmlElement> nodes = [];
 
-    // Choose specific row or all rows
-    if (rowNum > 0) {
-      if (chart.rows.length >= rowNum) {
-        var row = XmlDocumentFragment.parse(chart.rows[rowNum - 1]);
+    // Handle offset
+    if (offset > 0) {
+      for (var i = 0; i < pActions.length; i++) {
+        var pa = pActions[i];
 
-        for (var c in row.findAllElements('opaf:action')) {
-          if (c.getAttribute('name') == 'none') {
-            continue;
-          }
+        int pCount = int.parse(pa.getAttribute('count') as String);
+        int pTotal = int.parse(pa.getAttribute('total') as String);
 
-          nodes.addAll(processNode(c, values));
+        // Check if offset is reached
+        if (offset == 0 && count >= pTotal) {
+          nodes.add(pa);
+          count -= pTotal;
+          continue;
         }
 
-        // Add chart reference to action
-        OPAFUtils.addChartAttribute(nodes, name, rowNum - 1);
-      }
-    } else {
-      for (final (i, r) in chart.rows.indexed) {
-        var row = XmlDocumentFragment.parse(r);
-
-        for (var c in row.childElements) {
-          // Remove irrelevant actions
-          for (var a in c.findAllElements('opaf:action')) {
-            if (a.getAttribute('name') == 'none') {
-              a.remove();
-            }
-          }
-
-          var r_nodes = processNode(c, values);
-          OPAFUtils.addChartAttribute(r_nodes, name, i);
-
-          nodes.addAll(r_nodes);
+        if ((pTotal / pCount).round() > offset) {
+          print("opaf:chart - offset is invalid");
+          throw OPAFInvalidException();
         }
+
+        if (pTotal <= offset) {
+          offset -= pTotal;
+          continue;
+        }
+
+        // Refactor action for offset or stitch count
+        var a = rowActions[i];
+
+        int aCount;
+
+        if (offset == 0) {
+          aCount = (pCount / pTotal).round() * count;
+          count -= ((pTotal / pCount).round() * count);
+        } else {
+          aCount = (pCount / pTotal).round() * offset;
+          count -= ((pTotal / pCount).round() * offset);
+        }
+
+        a.setAttribute('count', aCount.toString());
+        nodes.addAll(processAction(a, values));
       }
     }
 
-    // Handle repeats
-    if (repeat > 1 && nodes.isNotEmpty) {
-      final builder = XmlBuilder();
-      builder.element('repeat', nest: () {
-        builder.attribute('count', repeat.toString());
+    // Work out number of row repeats for stitch count
+    if (count > 0) {
+      int repeatCount = (count / rowCount).floor();
 
-        for (var n in nodes) {
-          builder.xml(n.toXmlString());
-        }
-      });
+      if (repeatCount > 0) {
+        final builder = XmlBuilder();
+        builder.element('repeat', nest: () {
+          builder.attribute('count', repeatCount.toString());
 
-      return builder.buildFragment().childElements.toList();
-    } else {
-      return nodes;
+          for (var ra in pActions) {
+            builder.xml(ra.toXmlString());
+          }
+        });
+
+        nodes.addAll(builder.buildFragment().childElements);
+
+        // Update stitch count
+        count -= repeatCount * rowCount;
+      }
     }
+
+    // Work out remaining stitches
+    if (count > 0) {
+      for (var i = 0; i < pActions.length; i++) {
+        if (count == 0) {
+          break;
+        }
+
+        var pa = pActions[i];
+
+        int pCount = int.parse(pa.getAttribute('count') as String);
+        int pTotal = int.parse(pa.getAttribute('total') as String);
+
+        if ((pTotal / pCount).round() > count) {
+          print("opaf:chart - cannot return desired stitch count");
+          throw OPAFInvalidException();
+        }
+
+        if (pTotal <= count) {
+          nodes.add(pa);
+          count -= pTotal;
+          continue;
+        }
+
+        // Refactor action for stitch count
+        var a = rowActions[i];
+        int aCount = (pCount / pTotal).round() * count;
+        a.setAttribute('count', aCount.toString());
+        nodes.addAll(processAction(a, values));
+
+        break;
+      }
+    }
+
+    OPAFUtils.addChartAttribute(nodes, name, rowNum - 1);
+
+    return nodes;
   }
 
   List<XmlElement> processBlock(node, values) {
