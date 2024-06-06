@@ -15,6 +15,8 @@
  *
  */
 
+import 'dart:math' as m;
+
 import 'opaf_exceptions.dart';
 
 class OPAFFuncs {
@@ -111,5 +113,24 @@ class OPAFFuncs {
   static bool isEmpty(dynamic val) {
     return val.toString().isEmpty;
   }
-}
 
+  static bool odd(num val) {
+    return !even(val);
+  }
+
+  static bool even(num val) {
+    return (val % 2) == 0;
+  }
+
+  static bool multiple(num val, num multiple) {
+    return (val % multiple) == 0;
+  }
+
+  static num min(num val1, num val2) {
+    return m.min(val1, val2);
+  }
+
+  static num max(num val1, num val2) {
+    return m.max(val1, val2);
+  }
+}

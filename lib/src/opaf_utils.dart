@@ -17,6 +17,7 @@
 
 import 'dart:io';
 
+import 'package:opaf/opaf.dart';
 import 'package:path/path.dart' as p;
 import 'package:string_validator/string_validator.dart';
 import 'package:xml/xml.dart';
@@ -41,8 +42,9 @@ class OPAFUtils {
       'block',
       'chart',
       'component',
-      'helper',
       'image',
+      'instruction',
+      'repeat',
       'row',
       'text'
   ];
@@ -204,16 +206,6 @@ static String? parseUri(String uri, String? dir) {
     return paramStrings.join(' ');
   }
 
-  static OPAFImage? getImageByName(List<OPAFImage> images, String name) {
-    for (var i in images) {
-      if (i.name == name) {
-        return i;
-      }
-    }
-
-    return null;
-  }
-
   static (List<List<XmlElement>>, List<int>) sortNodeArray(List<List<XmlElement>> nodeArr) {
     // Store nodes and number of adjacent repeats
     List<List<XmlElement>> nodeArrays = [];
@@ -349,5 +341,35 @@ static String? parseUri(String uri, String? dir) {
     }
 
     return maxCount;
+  }
+
+  static OPAFImage? getImageByName(List<OPAFImage> images, String name) {
+    for (var i in images) {
+      if (i.name == name) {
+        return i;
+      }
+    }
+
+    return null;
+  }
+
+  static OPAFColor? getColorByName(List<OPAFColor> colors, String name) {
+    for (var c in colors) {
+      if (c.name == name) {
+        return c;
+      }
+    }
+
+    return null;
+  }
+
+  static OPAFChart? getChartByName(List<OPAFChart> charts, String name) {
+    for (var c in charts) {
+      if (c.name == name) {
+        return c;
+      }
+    }
+
+    return null;
   }
 }

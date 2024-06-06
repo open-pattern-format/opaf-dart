@@ -22,7 +22,6 @@ import 'package:xml/xml.dart';
 
 import 'opaf_action.dart';
 import 'opaf_block.dart';
-import 'opaf_chart.dart';
 import 'opaf_component.dart';
 import 'opaf_document.dart';
 import 'opaf_exceptions.dart';
@@ -35,7 +34,6 @@ class OPAFCompiler {
       'opaf',
       'condition',
       'name',
-      'repeat',
   ];
 
   OPAFDocument opafDoc;
@@ -145,6 +143,10 @@ class OPAFCompiler {
         for (var a in c.attributes) {
           c.setAttribute(a.localName, OPAFUtils.evaluateExpr(a.value, params));
         }
+
+        if (params.containsKey('chart')) {
+          c.setAttribute('chart', params['chart']);
+        }
         
         nodes.add(c);
       }
@@ -198,47 +200,25 @@ class OPAFCompiler {
     return builder.buildFragment().childElements.toList();
    }
 
-  List<XmlElement> processRow(XmlElement node, Map<String, dynamic> values) {
+  List<XmlElement> processInstruction(XmlElement node, Map<String, dynamic> values) {
     // Check type
     if (node.getAttribute("type") == null) {
-      print("Row attribute 'type' not found.");
+      print("Instruction attribute 'type' not found.");
       throw OPAFInvalidException();
     }
 
     List<XmlElement> nodes = [];
 
-    // Default parameters
-    if (globalValues.containsKey("opaf_prev_row_count")) {
-      values["opaf_prev_row_count"] = globalValues["opaf_prev_row_count"];
-    }
-
-    if (globalValues.containsKey("opaf_prev_row_offset")) {
-      values["opaf_prev_row_offset"] = globalValues["opaf_prev_row_offset"];
-    }
-
     for (var c in node.childElements) {
       nodes.addAll(processNode(c, values));
     }
 
-    // Calculate row count
-    int offset = 0;
-
-    if (node.getAttribute('offset') != null) {
-      offset = int.tryParse(OPAFUtils.evaluateExpr(node.getAttribute('offset') as String, values)) ?? 0;
-    }
-
-    int count = OPAFUtils.getStitchCount(nodes) + offset;
-    globalValues['opaf_prev_row_count'] = count;
-    globalValues['opaf_prev_row_offset'] = offset;
-
     final builder = XmlBuilder();
-    builder.element("row", nest: () {
+    builder.element("instruction", nest: () {
       builder.attribute("type", node.getAttribute("type"));
-      builder.attribute("count", count.toString());
 
       for (var a in node.attributes) {
-        if (protectedAttributes.contains(a.localName)
-        || a.localName == 'offset') {
+        if (protectedAttributes.contains(a.localName)) {
           continue;
         }
 
@@ -253,207 +233,68 @@ class OPAFCompiler {
     return builder.buildFragment().childElements.toList();
   }
 
-  List<XmlElement> processChart(node, values) {
-    // Get chart object
-    String name = node.getAttribute('name');
-    OPAFChart? chart = opafDoc.getOpafChart(name);
-
-    if (chart == null) {
-      print("Unable to find chart with name '$name'");
-      return [];
-    }
-
-    // Attributes
-    int rowNum = node.getAttribute('row') == null ? 0 :
-    OPAFUtils.strToNum(
-      OPAFUtils.evaluateExpr(
-          node.getAttribute('row'),
-          values
-      )
-    );
-
-    int count = node.getAttribute('count') == null ? 0 :
-    OPAFUtils.strToNum(
-      OPAFUtils.evaluateExpr(
-        node.getAttribute('count'),
-        values
-      )
-    ).round();
-  
-    int offset = node.getAttribute('offset') == null ? 0 :
-    OPAFUtils.strToNum(
-      OPAFUtils.evaluateExpr(
-        node.getAttribute('offset'),
-        values
-      )
-    ).round();
-  
-    // Check row number has been specified
-    if (rowNum == 0) {
-      print("opaf:chart received an invalid or missing 'row' attribute");
+  List<XmlElement> processRepeat(XmlElement node, Map<String, dynamic> values) {
+    // Check count
+    if (node.getAttribute("count") == null) {
+      print("Repeat attribute 'count' not found.");
       throw OPAFInvalidException();
-    }
-
-    // Check stitch count is valid
-    if (count == 0) {
-      print("opaf:chart received an invalid or missing 'count' attribute.");
-      throw OPAFInvalidException();
-    }
-
-    // Parse rows
-    List<XmlElement> rows = [];
-
-    for (var r in chart.rows) {
-      var rNode = XmlDocumentFragment.parse(r);
-
-      if (OPAFUtils.evaluateNodeCondition(rNode.firstElementChild as XmlElement, values)) {
-        rows.add(rNode.firstElementChild as XmlElement);
-      }
-    }
-
-    // Get row and actions
-    if (rowNum > rows.length) {
-      print("opaf:chart - row specified is invalid.");
-      throw OPAFInvalidException();
-    }
-
-    var row = rows[rowNum - 1];
-    List<XmlElement> rowActions = [];
-
-    for (var a in row.findAllElements('opaf:action')) {
-      if (a.getAttribute('name') == 'none') {
-        continue;
-      }
-
-      if (OPAFUtils.evaluateNodeCondition(a, values)) {
-        rowActions.add(a);
-      }
-    }
-
-    if (rowActions.isEmpty) {
-      print("opaf:chart - no actions found for specified row");
-      throw OPAFInvalidException();
-    }
-
-    // Processed actions
-    List<XmlElement> pActions = [];
-    int rowCount = 0;
-
-    for (var a in rowActions) {
-      var pNodes = processNode(a, values);
-
-      for (var pn in pNodes) {
-        rowCount += int.parse(pn.getAttribute('total') as String);
-        pActions.add(pn);
-      }
-    }
-
-    if (offset > rowCount) {
-      print("opaf:chart - offset is greater than requested row stitch count");
     }
 
     List<XmlElement> nodes = [];
 
-    // Handle offset
-    if (offset > 0) {
-      for (var i = 0; i < pActions.length; i++) {
-        var pa = pActions[i];
+    for (var c in node.childElements) {
+      nodes.addAll(processNode(c, values));
+    }
 
-        int pCount = int.parse(pa.getAttribute('count') as String);
-        int pTotal = int.parse(pa.getAttribute('total') as String);
-
-        // Check if offset is reached
-        if (offset == 0 && count >= pTotal) {
-          nodes.add(pa);
-          count -= pTotal;
+    final builder = XmlBuilder();
+    builder.element("repeat", nest: () {
+      for (var a in node.attributes) {
+        if (protectedAttributes.contains(a.localName)) {
           continue;
         }
 
-        if ((pTotal / pCount).round() > offset) {
-          print("opaf:chart - offset is invalid");
-          throw OPAFInvalidException();
-        }
+        builder.attribute(a.localName, OPAFUtils.evaluateExpr(a.value, values));
+      }
 
-        if (pTotal <= offset) {
-          offset -= pTotal;
+      for (var n in nodes) {
+        builder.xml(n.toXmlString());
+      }
+    });
+
+    return builder.buildFragment().childElements.toList();
+  }
+
+  List<XmlElement> processRow(XmlElement node, Map<String, dynamic> values) {
+    // Check type
+    if (node.getAttribute("type") == null) {
+      print("Row attribute 'type' not found.");
+      throw OPAFInvalidException();
+    }
+
+    List<XmlElement> nodes = [];
+
+    for (var c in node.childElements) {
+      nodes.addAll(processNode(c, values));
+    }
+
+    final builder = XmlBuilder();
+    builder.element("row", nest: () {
+      builder.attribute("type", node.getAttribute("type"));
+
+      for (var a in node.attributes) {
+        if (protectedAttributes.contains(a.localName)) {
           continue;
         }
 
-        // Refactor action for offset or stitch count
-        var a = rowActions[i];
-
-        int aCount;
-
-        if (offset == 0) {
-          aCount = (pCount / pTotal).round() * count;
-          count -= ((pTotal / pCount).round() * count);
-        } else {
-          aCount = (pCount / pTotal).round() * offset;
-          count -= ((pTotal / pCount).round() * offset);
-        }
-
-        a.setAttribute('count', aCount.toString());
-        nodes.addAll(processAction(a, values));
+        builder.attribute(a.localName, OPAFUtils.evaluateExpr(a.value, values));
       }
-    }
 
-    // Work out number of row repeats for stitch count
-    if (count > 0) {
-      int repeatCount = (count / rowCount).floor();
-
-      if (repeatCount > 0) {
-        final builder = XmlBuilder();
-        builder.element('repeat', nest: () {
-          builder.attribute('count', repeatCount.toString());
-
-          for (var ra in pActions) {
-            builder.xml(ra.toXmlString());
-          }
-        });
-
-        nodes.addAll(builder.buildFragment().childElements);
-
-        // Update stitch count
-        count -= repeatCount * rowCount;
+      for (var n in nodes) {
+        builder.xml(n.toXmlString());
       }
-    }
+    });
 
-    // Work out remaining stitches
-    if (count > 0) {
-      for (var i = 0; i < pActions.length; i++) {
-        if (count == 0) {
-          break;
-        }
-
-        var pa = pActions[i];
-
-        int pCount = int.parse(pa.getAttribute('count') as String);
-        int pTotal = int.parse(pa.getAttribute('total') as String);
-
-        if ((pTotal / pCount).round() > count) {
-          print("opaf:chart - cannot return desired stitch count");
-          throw OPAFInvalidException();
-        }
-
-        if (pTotal <= count) {
-          nodes.add(pa);
-          count -= pTotal;
-          continue;
-        }
-
-        // Refactor action for stitch count
-        var a = rowActions[i];
-        int aCount = (pCount / pTotal).round() * count;
-        a.setAttribute('count', aCount.toString());
-        nodes.addAll(processAction(a, values));
-
-        break;
-      }
-    }
-
-    OPAFUtils.addChartAttribute(nodes, name, rowNum - 1);
-
-    return nodes;
+    return builder.buildFragment().childElements.toList();
   }
 
   List<XmlElement> processBlock(node, values) {
@@ -468,13 +309,6 @@ class OPAFCompiler {
     if (block == null) {
       print("Unable to find block with name '$name'");
       return [];
-    }
-
-    // Repeat
-    int repeat = 1;
-
-    if (node.getAttribute("repeat") != null) {
-      repeat = int.tryParse(OPAFUtils.evaluateExpr(node.getAttribute("repeat"), values)) ?? 1;
     }
 
     Map<String, dynamic> params = Map.of(block.params);
@@ -497,54 +331,24 @@ class OPAFCompiler {
       }
     }
 
-    params["repeat_total"] = repeat;
+    // Add global values
+    params.addAll(globalValues);
 
-    // Process elements the required number of times handling repeats
-    List<List<XmlElement>> nodeArr = [];
+    // Process elements
+    List<XmlElement> nodes = [];
 
-    for (var i = 1; i <= repeat; i++) {
-      List<XmlElement> nodes = [];
+    for (var e in block.elements) {
+      var element = XmlDocumentFragment.parse(e);
 
-      // Default parameters
-      params["repeat"] = i;
-
-      for (var e in block.elements) {
-        var element = XmlDocumentFragment.parse(e);
-
-        for (var ec in element.childElements) {
-          nodes.addAll(processNode(ec, params));
-        }
+      for (var ec in element.childElements) {
+        nodes.addAll(processNode(ec, params));
       }
-
-      nodeArr.add(nodes);
     }
 
     final builder = XmlBuilder();
 
-    if (OPAFUtils.containsDuplicates(nodeArr)) {
-      var (sortedNodes, repeats) = OPAFUtils.sortNodeArray(nodeArr);
-
-      for (var i = 0; i < sortedNodes.length; i++) {
-        if (repeats[i] > 1) {
-          builder.element("repeat", nest: () {
-            builder.attribute("count", repeats[i]);
-
-            for (var n in sortedNodes[i]) {
-              builder.xml(n.toXmlString());
-            }
-          });
-        } else {
-          for (var n in sortedNodes[i]) {
-            builder.xml(n.toXmlString());
-          }
-        }
-      }
-    } else {
-      for (var a in nodeArr) {
-        for (var e in a) {
-          builder.xml(e.toXmlString());
-        }
-      }
+    for (var n in nodes) {
+      builder.xml(n.toXmlString());
     }
 
     return builder.buildFragment().childElements.toList();
@@ -562,10 +366,12 @@ class OPAFCompiler {
         nodes.addAll(processText(node, values));
       } else if (node.localName == "block") {
         nodes.addAll(processBlock(node, values));
+      } else if (node.localName == "instruction") {
+        nodes.addAll(processInstruction(node, values));
       } else if (node.localName == "row") {
         nodes.addAll(processRow(node, values));
-      } else if (node.localName == "chart") {
-        nodes.addAll(processChart(node, values));
+      } else if (node.localName == "repeat") {
+        nodes.addAll(processRepeat(node, values));
       }
     }
 

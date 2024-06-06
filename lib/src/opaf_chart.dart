@@ -24,6 +24,7 @@ class OPAFChart {
 
   static final chartNodes = [
     'action',
+    'repeat',
     'row',
   ];
 

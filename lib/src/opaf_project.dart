@@ -25,6 +25,7 @@ import 'opaf_color.dart';
 import 'opaf_exceptions.dart';
 import 'opaf_image.dart';
 import 'opaf_pattern.dart';
+import 'opaf_utils.dart';
 
 class OPAFProject {
   File file;
@@ -94,7 +95,7 @@ class OPAFProject {
     var node = xmlDoc.rootElement;
 
     for (var c in node.findElements('color')) {
-      var color = getColorByName(c.getAttribute('name') ?? '');
+      var color = OPAFUtils.getColorByName(colors, c.getAttribute('name') ?? '');
 
       if (color == null) {
         continue;
@@ -126,36 +127,6 @@ class OPAFProject {
     for (var p in node.findElements('pattern')) {
       pattern = OPAFPattern.parse(p);
     }
-  }
-
-  OPAFImage? getImageByName(String name) {
-    for (var i in images) {
-      if (i.name == name) {
-        return i;
-      }
-    }
-
-    return null;
-  }
-
-  OPAFColor? getColorByName(String name) {
-    for (var c in colors) {
-      if (c.name == name) {
-        return c;
-      }
-    }
-
-    return null;
-  }
-
-  OPAFChart? getChartByName(String name) {
-    for (var c in charts) {
-      if (c.name == name) {
-        return c;
-      }
-    }
-
-    return null;
   }
 
   void updateProgress() {
