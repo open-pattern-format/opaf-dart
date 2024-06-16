@@ -425,7 +425,13 @@ class OPAFCompiler {
       // Images
       if (opafDoc.opafImages.isNotEmpty) {
         for (var i in opafDoc.opafImages) {
-          builder.element("image", attributes: {"name": i.name, "data": base64Encode(i.data)});
+          if (i.data == null) {
+            i.convert();
+          }
+
+          if (i.data != null) {
+            builder.element("image", attributes: {"name": i.name, "data": base64Encode(i.data!)});
+          }
         }
       }
 

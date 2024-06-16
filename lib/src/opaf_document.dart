@@ -25,7 +25,6 @@ import 'opaf_block.dart';
 import 'opaf_chart.dart';
 import 'opaf_color.dart';
 import 'opaf_component.dart';
-import 'opaf_exceptions.dart';
 import 'opaf_image.dart';
 import 'opaf_metadata.dart';
 import 'opaf_utils.dart';
@@ -36,7 +35,7 @@ class OPAFDocument {
   String uniqueId = "";
   String name = "";
   Version version = Version.parse('1.0');
-  String? opafNamespace;
+  String opafNamespace = 'https://github.com/open-pattern-format/opaf/wiki';
   Version? pkgVersion;
   List<OPAFValue> opafValues = [];
   List<OPAFColor> opafColors = [];
@@ -53,12 +52,12 @@ class OPAFDocument {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
     builder.element('pattern', nest: () {
-      if (opafNamespace != null) {
-        builder.namespace(opafNamespace as String, 'opaf');
-      }
-
-      builder.attribute('name', name);
       builder.attribute('version', version.toString());
+      builder.namespace(opafNamespace as String, 'opaf');
+
+      if (name.isNotEmpty) {
+        builder.attribute('name', name);
+      }
 
       if (uniqueId.isNotEmpty) {
         builder.attribute('unique_id', uniqueId);
@@ -67,7 +66,12 @@ class OPAFDocument {
       if (pkgVersion != null) {
         builder.attribute('pkg_version', pkgVersion.toString());
       }
-  
+
+      // Metadata
+      builder.element('opaf:metadata', nest: () {
+        metadata.toXml(builder);
+      });
+
       // Colors
       for (var c in opafColors) {
         builder.element('opaf:define_color', nest: () {
@@ -112,6 +116,33 @@ class OPAFDocument {
         });
       }
 
+      // Images
+      for (var i in opafImages) {
+        if (i.uri == null) {
+            continue;
+        }
+
+        builder.element('opaf:define_image', nest: () {
+          builder.attribute('name', i.name);
+          builder.attribute('uri', i.uri);
+
+          if (i.size != null) {
+            builder.attribute('size', i.size.toString());
+          }
+        });
+      }
+
+      // Charts
+      for (var c in opafCharts) {
+        builder.element('opaf:define_chart', nest: () {
+          builder.attribute('name', c.name);
+
+          for (var r in c.rows) {
+            builder.xml(r);
+          }
+        });
+      }
+
       // Blocks
       for (var b in opafBlocks) {
         builder.element('opaf:define_block', nest: () {
@@ -150,62 +181,78 @@ class OPAFDocument {
     return builder.buildDocument();
   }
 
+  void saveToFile() {
+    file.writeAsString(toXml().toString());
+  }
+
   void addOpafColor(OPAFColor color) {
-    for (var c in opafColors) {
-      if (c.name == color.name) {
-        print("Color with name '${color.name}' already exists");
-        throw OPAFInvalidException();
-      }
+    int index = opafColors.indexWhere((c) => color.name == c.name);
+
+    if (index < 0) {
+      opafColors.add(color);
+    } else {
+      opafColors[index] = color;
     }
-    opafColors.add(color);
   }
 
   void addOpafValue(OPAFValue value) {
-    opafValues.add(value);
+    int index = opafValues.indexWhere((v) => value.uniqueId == v.uniqueId);
+
+    if (index < 0) {
+      opafValues.add(value);
+    } else {
+      opafValues[index] = value;
+    }
   }
 
   void addOpafImage(OPAFImage image) {
-    for (var i in opafImages) {
-      if (i.name == image.name) {
-        print("Image with name '${image.name}' already exists");
-        throw OPAFInvalidException();
-      }
+    int index = opafImages.indexWhere((i) => image.name == i.name);
+
+    if (index < 0) {
+      opafImages.add(image);
+    } else {
+      opafImages[index] = image;
     }
-    opafImages.add(image);
   }
 
  void addOpafAction(OPAFAction action) {
-    for (var a in opafActions) {
-      if (a.name == action.name) {
-        print("Action with name '${action.name}' already exists");
-        throw OPAFInvalidException();
-      }
+    int index = opafActions.indexWhere((a) => action.name == a.name);
+
+    if (index < 0) {
+      opafActions.add(action);
+    } else {
+      opafActions[index] = action;
     }
-    opafActions.add(action);
   }
 
  void addOpafChart(OPAFChart chart) {
-    for (var c in opafCharts) {
-      if (c.name == chart.name) {
-        print("Chart with name '${chart.name}' already exists");
-        throw OPAFInvalidException();
-      }
+    int index = opafCharts.indexWhere((c) => chart.name == c.name);
+
+    if (index < 0) {
+      opafCharts.add(chart);
+    } else {
+      opafCharts[index] = chart;
     }
-    opafCharts.add(chart);
   }
 
  void addOpafBlock(OPAFBlock block) {
-    for (var b in opafBlocks) {
-      if (b.name == block.name) {
-        print("Block with name '${block.name}' already exists");
-        throw OPAFInvalidException();
-      }
+    int index = opafBlocks.indexWhere((b) => block.name == b.name);
+
+    if (index < 0) {
+      opafBlocks.add(block);
+    } else {
+      opafBlocks[index] = block;
     }
-    opafBlocks.add(block);
   }
 
  void addOpafComponent(OPAFComponent component) {
-    opafComponents.add(component);
+    int index = opafComponents.indexWhere((c) => component.uniqueId == c.uniqueId);
+
+    if (index < 0) {
+      opafComponents.add(component);
+    } else {
+      opafComponents[index] = component;
+    }
   }
 
   void setOpafMetadata(OPAFMetadata metadata) {

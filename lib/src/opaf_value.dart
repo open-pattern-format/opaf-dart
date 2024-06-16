@@ -15,6 +15,7 @@
  *
  */
 
+import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
 import 'opaf_exceptions.dart';
@@ -22,6 +23,7 @@ import 'opaf_exceptions.dart';
 
 
 class OPAFValue {
+  String uniqueId;
   String name;
   String value;
   bool config;
@@ -31,6 +33,7 @@ class OPAFValue {
   String? condition;
 
   OPAFValue(
+    this.uniqueId,
     this.name, 
     this.value,
     this.config,
@@ -61,6 +64,7 @@ class OPAFValue {
       throw OPAFParserException();
     }
   
+    String uniqueId = node.getAttribute("unique_id") ?? Uuid().v4();
     String name = node.getAttribute("name") as String;
     String value = node.getAttribute("value") as String;
   
@@ -89,6 +93,6 @@ class OPAFValue {
     // Condition
     String? condition = node.getAttribute('condition');
     
-    return OPAFValue(name, value, config, required, allowedValues, description, condition);
+    return OPAFValue(uniqueId, name, value, config, required, allowedValues, description, condition);
   }
 }

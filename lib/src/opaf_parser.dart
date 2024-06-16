@@ -34,14 +34,14 @@ import 'opaf_utils.dart';
 import 'opaf_value.dart';
 
 class OPAFParser {
-  String filePath;
+  late String filePath;
   late XmlDocument xmlDoc;
-  final String namespace = 'https://github.com/open-pattern-format/opaf/wiki';
   late OPAFDocument opafDoc;
+
+  OPAFParser.update(this.xmlDoc, this.opafDoc);
 
   OPAFParser(this.filePath) {
     opafDoc = OPAFDocument(File(filePath));
-    opafDoc.opafNamespace = namespace;  
   }
 
   OPAFParser initialize() {

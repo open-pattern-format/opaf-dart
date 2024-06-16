@@ -30,12 +30,42 @@ class OPAFImage {
   static const defaultSize = 1000;
 
   String name;
-  Uint8List data;
+  Uint8List? data;
+  String? uri;
+  int? size;
+  String? path;
 
-  OPAFImage(this.name, this.data);
+  OPAFImage(this.name, this.data, this.uri, this.size, this.path);
+
+  convert() {
+    if (path == null) {
+      print("Image path not found.");
+      throw OPAFParserException();
+    }
+
+    // Decode image
+    Image? origImage = decodeImage(File(path!).readAsBytesSync());
+
+    if (origImage == null) {
+      print("Failed to decode image at path '$path'");
+      throw OPAFParserException();
+    }
+
+    // Resize
+    int scale = size ?? OPAFImage.defaultSize;
+
+    final image = copyResize(origImage, width: scale, maintainAspect: true);
+
+    data = encodeJpg(image, quality: 80);
+    uri = null;
+    size = null;
+  }
 
   static OPAFImage parse(XmlElement node, String? dir) {
-    Uint8List data;
+    Uint8List? data;
+    String? path;
+    String? uri;
+    int? size;
 
     if (node.nodeType != XmlNodeType.ELEMENT) {
       print("Unexpected node type");
@@ -54,43 +84,27 @@ class OPAFImage {
 
     // URI
     if (node.getAttribute("uri") != null) {
-      String uri = node.getAttribute("uri") as String;
-      String? imgPath = OPAFUtils.parseUri(uri, dir);
+      uri = node.getAttribute("uri") as String;
+      path = OPAFUtils.parseUri(uri, dir);
 
-      if (imgPath == null) {
+      if (path == null) {
         print("Image not found with uri: $uri");
         throw OPAFParserException();
       }
+    }
 
-      // Decode image
-      Image? origImage = decodeImage(File(imgPath).readAsBytesSync());
-
-      if (origImage == null) {
-        print("Failed to decode image at path '$imgPath'");
-        throw OPAFParserException();
-      }
-
-      // Resize
-      int size = OPAFImage.defaultSize;
-
-      if (node.getAttribute('size') != null) {
-        size = int.tryParse(node.getAttribute('size') as String) ?? OPAFImage.defaultSize;
-      }
-
-      final image = copyResize(origImage, width: size, maintainAspect: true);
-
-      data = encodeJpg(image, quality: 80);
-    } else {
-      if (node.getAttribute('data') == null) {
-        print("No 'data' attribute found for image");
-        throw OPAFParserException();
-      }
-
+    // Data
+    if (node.getAttribute('data') != null) {
       data = base64Decode(node.getAttribute("data") as String);
+    }
+
+    // Size
+    if (node.getAttribute('size') != null) {
+      size = int.tryParse(node.getAttribute('size') as String) ?? OPAFImage.defaultSize;
     }
     
     String name = node.getAttribute("name") as String;
     
-    return OPAFImage(name, data);
+    return OPAFImage(name, data, uri, size, path);
   }
 }
