@@ -23,6 +23,7 @@ import 'package:string_validator/string_validator.dart';
 import 'package:xml/xml.dart';
 import 'package:expressions/expressions.dart';
 
+import 'opaf_color.dart';
 import 'opaf_document.dart';
 import 'opaf_exceptions.dart';
 import 'opaf_image.dart';
@@ -125,7 +126,7 @@ static String? parseUri(String uri, String? dir) {
   }
 
   static void validateParams(OPAFDocument doc, Map<String, dynamic> params) {
-    // Check colors
+    // Check color
     if (params.containsKey('color')) {
       var colors = doc.getOpafColors();
 

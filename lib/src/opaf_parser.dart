@@ -26,6 +26,7 @@ import 'opaf_block.dart';
 import 'opaf_color.dart';
 import 'opaf_component.dart';
 import 'opaf_chart.dart';
+import 'opaf_config.dart';
 import 'opaf_document.dart';
 import 'opaf_exceptions.dart';
 import 'opaf_image.dart';
@@ -94,6 +95,18 @@ class OPAFParser {
     for (var element in elements) {
       var color = OPAFColor.parse(element);
       opafDoc.addOpafColor(color);
+    }
+
+    return this;
+  }
+
+  OPAFParser parseOpafConfigs([XmlDocument? doc]) {
+    XmlElement root = doc == null ? xmlDoc.rootElement : doc.rootElement;
+    var elements = root.findElements('opaf:define_config');
+
+    for (var element in elements) {
+      var config = OPAFConfig.parse(element);
+      opafDoc.addOpafConfig(config);
     }
 
     return this;
@@ -204,6 +217,7 @@ class OPAFParser {
       XmlDocument incDoc = XmlDocument.parse(File(path).readAsStringSync());
       parseOpafIncludes(p.dirname(path), incDoc);
       parseOpafColors(incDoc);
+      parseOpafConfigs(incDoc);
       parseOpafValues(incDoc);
       parseOpafImages(p.dirname(path), incDoc);
       parseOpafMetadata(incDoc);
@@ -217,6 +231,7 @@ class OPAFParser {
     parseRoot();
     parseOpafIncludes();
     parseOpafColors();
+    parseOpafConfigs();
     parseOpafValues();
     parseOpafImages();
     parseOpafMetadata();

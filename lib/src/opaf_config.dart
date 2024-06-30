@@ -15,34 +15,35 @@
  *
  */
 
-import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
 import 'opaf_exceptions.dart';
 
 
 
-class OPAFValue {
-  String uniqueId;
+class OPAFConfig {
   String name;
   String value;
-  String? condition;
+  bool required;
+  List<String> allowedValues;
+  String? description;
 
-  OPAFValue(
-    this.uniqueId,
+  OPAFConfig(
     this.name, 
     this.value,
-    this.condition
+    this.required,
+    this.allowedValues,
+    this.description,
   );
 
-  static OPAFValue parse(XmlElement node) {
+  static OPAFConfig parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       print("Unexpected node type");
       throw OPAFParserException();
     }
   
-    if (node.name.local != 'define_value') {
-      print("Expected node with name 'opaf:define_value' and got '${node.name}'");
+    if (node.name.local != 'define_config') {
+      print("Expected node with name 'opaf:define_config' and got '${node.name}'");
       throw OPAFParserException();
     }
   
@@ -56,13 +57,25 @@ class OPAFValue {
       throw OPAFParserException();
     }
   
-    String uniqueId = node.getAttribute("unique_id") ?? Uuid().v4();
     String name = node.getAttribute("name") as String;
     String value = node.getAttribute("value") as String;
+  
+    // Required
+    bool required = false;
+    if (node.getAttribute('required') != null) {
+      required = bool.parse(node.getAttribute('required') as String, caseSensitive: false);
+    }
 
-    // Condition
-    String? condition = node.getAttribute('condition');
+    // Allowed Values
+    List<String> allowedValues = [];
+    if (node.getAttribute('allowed_values') != null) {
+        allowedValues = (node.getAttribute('allowed_values') as String).split(',');
+        allowedValues.map((v) => v.trim());
+    }
+
+    // Description
+    String? description = node.getAttribute("description");
     
-    return OPAFValue(uniqueId, name, value, condition);
+    return OPAFConfig(name, value, required, allowedValues, description);
   }
 }

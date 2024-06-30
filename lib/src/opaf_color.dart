@@ -35,8 +35,9 @@ class OPAFColor {
 
   String name;
   String value;
+  String description;
 
-  OPAFColor(this.name, this.value);
+  OPAFColor(this.name, this.value, this.description);
 
   static bool isValid(String value) {
     if (hexColors.containsKey(value)) {
@@ -79,11 +80,12 @@ class OPAFColor {
       print("Value for color not found");
       throw OPAFParserException();
     }
-    
+
     String name = node.getAttribute("name") as String;
     String value = node.getAttribute("value") as String;
     value = toHex(value.trim().toLowerCase());
+    String description = node.getAttribute("description") ?? "";
     
-    return OPAFColor(name, value);
+    return OPAFColor(name, value, description);
   }
 }

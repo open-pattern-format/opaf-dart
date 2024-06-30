@@ -37,10 +37,33 @@ class OPAFCompiler {
   ];
 
   OPAFDocument opafDoc;
-  Map<String, dynamic> customValues = {};
+  Map<String, dynamic> customConfig = {};
   Map<String, dynamic> globalValues = {};
 
-  OPAFCompiler(this.opafDoc, this.customValues);
+  OPAFCompiler(this.opafDoc, this.customConfig);
+
+  void processConfig(XmlBuilder builder) {
+    for (var c in opafDoc.opafConfigs) {
+      if (customConfig.keys.contains(c.name)) {
+        if (c.allowedValues.isNotEmpty && !c.allowedValues.contains(customConfig[c.name])) {
+          print("${customConfig[c.name]} is not a valid value for ${c.name}");
+          throw OPAFInvalidException();
+        }
+
+        globalValues[c.name] = OPAFUtils.strToNum(customConfig[c.name]);
+      } else {
+        globalValues[c.name] = OPAFUtils.strToNum(
+          OPAFUtils.evaluateExpr(c.value, globalValues)
+        );
+      }
+
+      // Add config to project
+      builder.element("config", nest:() {
+        builder.attribute("name", c.name);
+        builder.attribute("value", globalValues[c.name].toString());
+      });
+    }
+  }
 
   void processValues(XmlBuilder builder) {
     for (var v in opafDoc.opafValues) {
@@ -51,31 +74,9 @@ class OPAFCompiler {
         }
       }
 
-      if (customValues.keys.contains(v.name)) {
-        if (!v.config) {
-          print("${v.name} is not a configurable value");
-          throw OPAFInvalidException();
-        }
-
-        if (v.allowedValues.isNotEmpty && !v.allowedValues.contains(customValues[v.name])) {
-          print("${customValues[v.name]} is not a valid value for ${v.name}");
-          throw OPAFInvalidException();
-        }
-
-        globalValues[v.name] = OPAFUtils.strToNum(customValues[v.name]);
-      } else {
-        globalValues[v.name] = OPAFUtils.strToNum(
-          OPAFUtils.evaluateExpr(v.value, globalValues)
-        );
-      }
-
-      // Add config to project
-      if (v.config) {
-        builder.element("config", nest:() {
-          builder.attribute("name", v.name);
-          builder.attribute("value", globalValues[v.name].toString());
-        });
-      }
+      globalValues[v.name] = OPAFUtils.strToNum(
+        OPAFUtils.evaluateExpr(v.value, globalValues)
+      );
     }
   }
 
@@ -84,6 +85,7 @@ class OPAFCompiler {
       builder.element("color", nest:() {
         builder.attribute('name', c.name);
         builder.attribute('value', c.value);
+        builder.attribute('description', c.description);
       });
     }
   }
@@ -410,7 +412,7 @@ class OPAFCompiler {
       throw OPAFNotPackagedException();
     }
 
-    if (!customValues.containsKey('name')) {
+    if (!customConfig.containsKey('name')) {
       throw OPAFInvalidException();
     }
 
@@ -419,7 +421,7 @@ class OPAFCompiler {
     // Set root element
     builder.processing('xml', 'version="1.0"');
     builder.element("project", nest: () {
-      builder.attribute("name", customValues['name']);
+      builder.attribute("name", customConfig['name']);
       builder.attribute("unique_id", Uuid().v4());
 
       // Images
@@ -447,6 +449,7 @@ class OPAFCompiler {
         });
       });
 
+      processConfig(builder);
       processValues(builder);
       processColors(builder);
 

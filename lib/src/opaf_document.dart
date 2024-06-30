@@ -25,6 +25,7 @@ import 'opaf_block.dart';
 import 'opaf_chart.dart';
 import 'opaf_color.dart';
 import 'opaf_component.dart';
+import 'opaf_config.dart';
 import 'opaf_image.dart';
 import 'opaf_metadata.dart';
 import 'opaf_utils.dart';
@@ -37,6 +38,7 @@ class OPAFDocument {
   Version version = Version.parse('1.0');
   String opafNamespace = 'https://github.com/open-pattern-format/opaf/wiki';
   Version? pkgVersion;
+  List<OPAFConfig> opafConfigs = [];
   List<OPAFValue> opafValues = [];
   List<OPAFColor> opafColors = [];
   List<OPAFImage> opafImages = [];
@@ -77,6 +79,7 @@ class OPAFDocument {
         builder.element('opaf:define_color', nest: () {
           builder.attribute('name', c.name);
           builder.attribute('value', c.value);
+          builder.attribute('description', c.description);
         });
       }
 
@@ -95,20 +98,27 @@ class OPAFDocument {
         });
       }
 
+      // Configs
+      for (var c in opafConfigs) {
+        builder.element('opaf:define_config', nest: () {
+          builder.attribute('name', c.name);
+          builder.attribute('value', c.value);
+
+          if (c.allowedValues.isNotEmpty) {
+            builder.attribute('allowed_values', c.allowedValues.join(','));
+          }
+
+          if (c.description != null) {
+            builder.attribute('description', c.description);
+          }
+        });
+      }
+
       // Values
       for (var v in opafValues) {
         builder.element('opaf:define_value', nest: () {
           builder.attribute('name', v.name);
           builder.attribute('value', v.value);
-          builder.attribute('config', v.config);
-
-          if (v.allowedValues.isNotEmpty) {
-            builder.attribute('allowed_values', v.allowedValues.join(','));
-          }
-
-          if (v.description != null) {
-            builder.attribute('description', v.description);
-          }
 
           if (v.condition != null) {
             builder.attribute('condition', v.condition);
@@ -192,6 +202,16 @@ class OPAFDocument {
       opafColors.add(color);
     } else {
       opafColors[index] = color;
+    }
+  }
+
+  void addOpafConfig(OPAFConfig config) {
+    int index = opafConfigs.indexWhere((c) => config.name == c.name);
+
+    if (index < 0) {
+      opafConfigs.add(config);
+    } else {
+      opafConfigs[index] = config;
     }
   }
 
@@ -339,15 +359,4 @@ class OPAFDocument {
     return metadata.title as String;
   }
 
-  List<OPAFValue> getConfigurableValues() {
-    List<OPAFValue> values = [];
-
-    for (var c in opafValues) {
-      if (c.config) {
-        values.add(c);
-      }
-    }
-
-    return values;
-  }
 }

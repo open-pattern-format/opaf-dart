@@ -34,7 +34,6 @@ class OPAFMetadata {
   String? copyright = '';
   String? description;
   String? published;
-  Map<String, String> colors = {};
   Map<String, String> notions = {};
   Map<String, String> needles = {};
   List<String> tags = [];
@@ -78,10 +77,6 @@ class OPAFMetadata {
       builder.element("tag", nest:() {
         builder.text(t);
       });
-    }
-
-    for (var c in colors.keys) {
-      builder.element("color", attributes: {"name": c, "description": colors[c] ?? ""});
     }
 
     for (var n in notions.keys) {
@@ -175,18 +170,6 @@ class OPAFMetadata {
       // Designer
       if (e.localName == 'designer') {
         metadata.designers.add(Designer.parse(e));
-      }
-
-      // Color
-      if (e.localName == 'color') {
-        var name = e.getAttribute('name');
-        var description = e.getAttribute('description');
-
-        if (name == null) {
-          continue;
-        }
-
-        metadata.colors[name] = description ?? '';
       }
 
       // Size

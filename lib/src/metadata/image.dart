@@ -22,7 +22,6 @@ import '../opaf_exceptions.dart';
 class Image {
   String name;
   String? tag;
-  String? caption;
 
   Image(this.name);
 
@@ -34,9 +33,6 @@ class Image {
         builder.attribute("tag", tag);
       }
 
-      if (caption != null) {
-        builder.attribute("caption", caption);
-      }
     });
   }
 
@@ -62,10 +58,6 @@ class Image {
 
     if (node.getAttribute('tag') != null) {
       image.tag = node.getAttribute('tag');
-    }
-
-    if (node.getAttribute('caption') != null) {
-      image.caption = node.getAttribute('caption');
     }
 
     return image;

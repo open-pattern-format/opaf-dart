@@ -22,6 +22,7 @@ export 'src/opaf_block.dart' show OPAFBlock;
 export 'src/opaf_chart.dart' show OPAFChart;
 export 'src/opaf_color.dart' show OPAFColor;
 export 'src/opaf_compiler.dart' show OPAFCompiler;
+export 'src/opaf_config.dart' show OPAFConfig;
 export 'src/opaf_component.dart' show OPAFComponent;
 export 'src/opaf_document.dart' show OPAFDocument;
 export 'src/opaf_exceptions.dart' show
