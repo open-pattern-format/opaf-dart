@@ -15,6 +15,7 @@
  *
  */
 
+import 'package:opaf/src/metadata/needle.dart';
 import 'package:xml/xml.dart';
 
 import 'opaf_exceptions.dart';
@@ -22,6 +23,7 @@ import 'opaf_exceptions.dart';
 import 'metadata/designer.dart';
 import 'metadata/gauge.dart';
 import 'metadata/image.dart';
+import 'metadata/notion.dart';
 import 'metadata/note.dart';
 import 'metadata/schematic.dart';
 import 'metadata/size.dart';
@@ -34,11 +36,11 @@ class OPAFMetadata {
   String? copyright = '';
   String? description;
   String? published;
-  Map<String, String> notions = {};
-  Map<String, String> needles = {};
   List<String> tags = [];
+  List<MetadataImage> images = [];
+  List<Notion> notions = [];
+  List<Needle> needles = [];
   List<Designer> designers = [];
-  List<Image> images = [];
   List<Size> sizes = [];
   List<Technique> techniques = [];
   List<Schematic> schematics = [];
@@ -79,12 +81,12 @@ class OPAFMetadata {
       });
     }
 
-    for (var n in notions.keys) {
-      builder.element("notion", attributes: {"name": n, "description": notions[n] ?? ""});
+    for (var n in notions) {
+      n.toXml(builder);
     }
 
-    for (var n in needles.keys) {
-      builder.element("needles", attributes: {"type": n, "size": needles[n] ?? ""});
+    for (var n in needles) {
+      n.toXml(builder);
     }
 
     for (var i in images) {
@@ -159,7 +161,7 @@ class OPAFMetadata {
 
       // Image
       if (e.localName == 'image') {
-        metadata.images.add(Image.parse(e));
+        metadata.images.add(MetadataImage.parse(e));
       }
 
       // Tag
@@ -199,26 +201,12 @@ class OPAFMetadata {
 
       // Notion
       if (e.localName == 'notion') {
-        var name = e.getAttribute('name');
-        var description = e.getAttribute('description');
-
-        if (name == null) {
-          continue;
-        }
-
-        metadata.notions[name] = description ?? '';
+        metadata.notions.add(Notion.parse(e));
       }
 
       // Needles
-      if (e.localName == 'needles') {
-        var type = e.getAttribute('type');
-        var size = e.getAttribute('size');
-
-        if (type == null || size == null) {
-          continue;
-        }
-
-        metadata.needles[type] = size;
+      if (e.localName == 'needle') {
+        metadata.needles.add(Needle.parse(e));
       }
 
       // Note

@@ -19,47 +19,46 @@ import 'package:xml/xml.dart';
 
 import '../opaf_exceptions.dart';
 
-class MetadataImage {
-  String name;
-  String? tag;
+class Needle {
 
-  MetadataImage(this.name);
+  String type;
+  String size;
+
+  Needle(this.type, this.size);
 
   void toXml(XmlBuilder builder) {
-    builder.element("image", nest:() {
-      builder.attribute("name", name);
-
-      if (tag != null) {
-        builder.attribute("tag", tag);
-      }
-
+    builder.element("notion", nest:() {
+      builder.attribute("type", type);
+      builder.attribute("size", size);
     });
   }
 
-  static MetadataImage parse(XmlElement node) {
+  static parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       print("Unexpected node type");
       throw OPAFParserException();
     }
   
-    if (node.name.local != 'image') {
-      print("Expected node with name 'image' and got '${node.name}'");
+    if (node.name.local != 'needle') {
+      print("Expected node with name 'needle' and got '${node.name}'");
       throw OPAFParserException();
     }
 
-    if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from image element");
+    if (node.getAttribute('type') == null) {
+      print("Attribute 'type' missing from 'needle' element");
       throw OPAFParserException();
     }
 
-    String name = node.getAttribute('name') as String;
-
-    MetadataImage image = MetadataImage(name);
-
-    if (node.getAttribute('tag') != null) {
-      image.tag = node.getAttribute('tag');
+    if (node.getAttribute('size') == null) {
+      print("Attribute 'size' missing from 'needle' element");
+      throw OPAFParserException();
     }
 
-    return image;
+    Needle needle = Needle(
+      node.getAttribute('type') as String,
+      node.getAttribute('size') as String,
+    );
+
+    return needle;
   }
 }

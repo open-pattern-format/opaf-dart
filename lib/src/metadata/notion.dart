@@ -19,47 +19,45 @@ import 'package:xml/xml.dart';
 
 import '../opaf_exceptions.dart';
 
-class MetadataImage {
-  String name;
-  String? tag;
+class Notion {
 
-  MetadataImage(this.name);
+  String name;
+  String? description;
+
+  Notion(this.name);
 
   void toXml(XmlBuilder builder) {
-    builder.element("image", nest:() {
+    builder.element("notion", nest:() {
       builder.attribute("name", name);
 
-      if (tag != null) {
-        builder.attribute("tag", tag);
+      if (description != null) {
+        builder.attribute("description", description);
       }
-
     });
   }
 
-  static MetadataImage parse(XmlElement node) {
+  static parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       print("Unexpected node type");
       throw OPAFParserException();
     }
   
-    if (node.name.local != 'image') {
-      print("Expected node with name 'image' and got '${node.name}'");
+    if (node.name.local != 'notion') {
+      print("Expected node with name 'notion' and got '${node.name}'");
       throw OPAFParserException();
     }
 
     if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from image element");
+      print("Attribute 'name' missing from 'notion' element");
       throw OPAFParserException();
     }
 
-    String name = node.getAttribute('name') as String;
-
-    MetadataImage image = MetadataImage(name);
-
-    if (node.getAttribute('tag') != null) {
-      image.tag = node.getAttribute('tag');
+    Notion notion = Notion(node.getAttribute('name') as String);
+    
+    if (node.getAttribute('description') != null) {
+      notion.description = node.getAttribute('description') as String;
     }
 
-    return image;
+    return notion;
   }
 }

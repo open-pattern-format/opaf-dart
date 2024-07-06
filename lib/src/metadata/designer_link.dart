@@ -15,51 +15,55 @@
  *
  */
 
+import 'package:string_validator/string_validator.dart';
 import 'package:xml/xml.dart';
 
 import '../opaf_exceptions.dart';
 
-class MetadataImage {
+class DesignerLink {
   String name;
-  String? tag;
+  String url;
 
-  MetadataImage(this.name);
+  DesignerLink(this.name, this.url);
 
   void toXml(XmlBuilder builder) {
-    builder.element("image", nest:() {
+    builder.element("link", nest:() {
       builder.attribute("name", name);
-
-      if (tag != null) {
-        builder.attribute("tag", tag);
-      }
-
+      builder.attribute("url", url);
     });
   }
 
-  static MetadataImage parse(XmlElement node) {
+  static DesignerLink parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       print("Unexpected node type");
       throw OPAFParserException();
     }
   
-    if (node.name.local != 'image') {
-      print("Expected node with name 'image' and got '${node.name}'");
+    if (node.name.local != 'link') {
+      print("Expected node with name 'link' and got '${node.name}'");
       throw OPAFParserException();
     }
 
     if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from image element");
+      print("Attribute 'name' missing from designer link");
+      throw OPAFParserException();
+    }
+  
+    if (node.getAttribute('url') == null) {
+      print("Attribute 'url' missing from designer link");
       throw OPAFParserException();
     }
 
     String name = node.getAttribute('name') as String;
+    String url = node.getAttribute('url') as String;
 
-    MetadataImage image = MetadataImage(name);
-
-    if (node.getAttribute('tag') != null) {
-      image.tag = node.getAttribute('tag');
+    if (!isURL(url)) {
+      print("${url} is not a valid url");
+      throw OPAFParserException();
     }
 
-    return image;
+    DesignerLink link = DesignerLink(name, url);
+
+    return link;
   }
 }

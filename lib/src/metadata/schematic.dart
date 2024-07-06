@@ -19,11 +19,12 @@ import 'package:xml/xml.dart';
 
 import '../opaf_exceptions.dart';
 import 'image.dart';
+import 'schematic_element.dart';
 
 class Schematic {
   String? name;
-  List<Image> images = [];
-  Map<String, String> elements = {};
+  List<MetadataImage> images = [];
+  List<SchematicElement> elements = [];
 
   Schematic();
 
@@ -37,8 +38,8 @@ class Schematic {
         i.toXml(builder);
       }
 
-      for (var e in elements.keys) {
-        builder.element("element", attributes: {"name": e, "description": elements[e] as String});
+      for (var e in elements) {
+        e.toXml(builder);
       }
     });
   }
@@ -64,7 +65,7 @@ class Schematic {
 
     for (var e in node.childElements) {
       if (e.localName == 'image') {
-        schematic.images.add(Image.parse(e));
+        schematic.images.add(MetadataImage.parse(e));
       }
 
       // Element
@@ -76,7 +77,7 @@ class Schematic {
           continue;
         }
 
-        schematic.elements[name] = description;
+        schematic.elements.add(SchematicElement(name, description));
       }
     }
 

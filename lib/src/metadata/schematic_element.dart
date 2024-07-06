@@ -19,47 +19,46 @@ import 'package:xml/xml.dart';
 
 import '../opaf_exceptions.dart';
 
-class MetadataImage {
-  String name;
-  String? tag;
+class SchematicElement {
 
-  MetadataImage(this.name);
+  String name;
+  String description;
+
+  SchematicElement(this.name, this.description);
 
   void toXml(XmlBuilder builder) {
-    builder.element("image", nest:() {
+    builder.element("element", nest:() {
       builder.attribute("name", name);
-
-      if (tag != null) {
-        builder.attribute("tag", tag);
-      }
-
+      builder.attribute("description", description);
     });
   }
 
-  static MetadataImage parse(XmlElement node) {
+  static parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       print("Unexpected node type");
       throw OPAFParserException();
     }
   
-    if (node.name.local != 'image') {
-      print("Expected node with name 'image' and got '${node.name}'");
+    if (node.name.local != 'element') {
+      print("Expected node with name 'element' and got '${node.name}'");
       throw OPAFParserException();
     }
 
     if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from image element");
+      print("Attribute 'name' missing from schematic element");
       throw OPAFParserException();
     }
 
-    String name = node.getAttribute('name') as String;
-
-    MetadataImage image = MetadataImage(name);
-
-    if (node.getAttribute('tag') != null) {
-      image.tag = node.getAttribute('tag');
+    if (node.getAttribute('description') == null) {
+      print("Attribute 'description' missing from schematic element");
+      throw OPAFParserException();
     }
 
-    return image;
+    SchematicElement element = SchematicElement(
+      node.getAttribute('name') as String,
+      node.getAttribute('description') as String
+    );
+
+    return element;
   }
 }

@@ -19,14 +19,15 @@ import 'package:string_validator/string_validator.dart';
 import 'package:xml/xml.dart';
 
 import '../opaf_exceptions.dart';
+import 'designer_link.dart';
 import 'image.dart';
 
 class Designer {
   String name;
   String? email;
   String? about;
-  List<Image> images = [];
-  Map<String, String> links = {};
+  List<MetadataImage> images = [];
+  List<DesignerLink> links = [];
 
   Designer(this.name);
 
@@ -46,8 +47,8 @@ class Designer {
         i.toXml(builder);
       }
 
-      for (var l in links.keys) {
-        builder.element("link", attributes: {"name": l, "url": links[l] as String});
+      for (var l in links) {
+        l.toXml(builder);
       }
     });
   }
@@ -84,20 +85,11 @@ class Designer {
 
     for (var e in node.childElements) {
       if (e.name.local == 'image') {
-        designer.images.add(Image.parse(e));
+        designer.images.add(MetadataImage.parse(e));
       }
 
       if (e.name.local == 'link') {
-        var lName = e.getAttribute('name');
-        var lUrl = e.getAttribute('url');
-
-        if (lName == null || lUrl == null) {
-          continue;
-        }
-
-        if (isURL(lUrl)) {
-          designer.links[lName] = lUrl;
-        }
+        designer.links.add(DesignerLink.parse(e));
       }
     }
 
