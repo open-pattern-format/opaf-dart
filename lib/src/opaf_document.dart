@@ -107,6 +107,7 @@ class OPAFDocument {
         builder.element('opaf:define_config', nest: () {
           builder.attribute('name', c.name);
           builder.attribute('value', c.value);
+          builder.attribute('required', c.required.toString());
 
           if (c.allowedValues.isNotEmpty) {
             builder.attribute('allowed_values', c.allowedValues.join(','));
