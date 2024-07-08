@@ -15,8 +15,10 @@
  *
  */
 
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart';
 import 'package:xml/xml.dart';
 import 'package:version/version.dart';
 
@@ -31,11 +33,13 @@ import 'opaf_metadata.dart';
 import 'opaf_utils.dart';
 import 'opaf_value.dart';
 
+final Version specVersion = Version.parse("0.1.0");
+
 class OPAFDocument {
   File file;
   String uniqueId = "";
   String name = "";
-  Version version = Version.parse('1.0');
+  Version version = Version.parse('1.0.0');
   String opafNamespace = 'https://github.com/open-pattern-format/opaf/wiki';
   Version? pkgVersion;
   List<OPAFConfig> opafConfigs = [];
@@ -50,7 +54,7 @@ class OPAFDocument {
   
   OPAFDocument(this.file);
 
-  XmlDocument toXml() {
+  XmlDocument toXml ({bool package=false}) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0"');
     builder.element('pattern', nest: () {
@@ -65,8 +69,8 @@ class OPAFDocument {
         builder.attribute('unique_id', uniqueId);
       }
 
-      if (pkgVersion != null) {
-        builder.attribute('pkg_version', pkgVersion.toString());
+      if (package) {
+        builder.attribute('pkg_version', specVersion.toString());
       }
 
       // Metadata
@@ -117,6 +121,7 @@ class OPAFDocument {
       // Values
       for (var v in opafValues) {
         builder.element('opaf:define_value', nest: () {
+          builder.attribute('unique_id', v.uniqueId);
           builder.attribute('name', v.name);
           builder.attribute('value', v.value);
 
@@ -134,10 +139,16 @@ class OPAFDocument {
 
         builder.element('opaf:define_image', nest: () {
           builder.attribute('name', i.name);
-          builder.attribute('uri', i.uri);
 
-          if (i.size != null) {
-            builder.attribute('size', i.size.toString());
+          if (package) {
+            i.convert();
+            builder.attribute('data', base64Encode(i.data!));
+          } else {
+            builder.attribute('uri', i.uri);
+
+            if (i.size != null) {
+              builder.attribute('size', i.size.toString());
+            }
           }
         });
       }
@@ -193,6 +204,12 @@ class OPAFDocument {
 
   void saveToFile() {
     file.writeAsString(toXml().toString());
+  }
+
+  void package() {
+    String path = '${withoutExtension(file.path)}_${version}.opafpkg';
+    File package_file = File(path);
+    package_file.writeAsString(toXml(package: true).toString());
   }
 
   void addOpafColor(OPAFColor color) {

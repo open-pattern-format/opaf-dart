@@ -16,7 +16,6 @@
  */
 
 import 'package:xml/xml.dart';
-
 import 'opaf_exceptions.dart';
 
 
