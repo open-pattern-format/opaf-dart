@@ -44,9 +44,9 @@ class OPAFImage {
     }
 
     // Decode image
-    Image? origImage = decodeImage(File(path!).readAsBytesSync());
+    Image? image = decodeImage(File(path!).readAsBytesSync());
 
-    if (origImage == null) {
+    if (image == null) {
       print("Failed to decode image at path '$path'");
       throw OPAFParserException();
     }
@@ -54,11 +54,15 @@ class OPAFImage {
     // Resize
     int scale = size ?? OPAFImage.defaultSize;
 
-    final image = copyResize(origImage, width: scale, maintainAspect: true);
+    if (image.height > scale || image.width > scale) {
+      image = copyResize(image, width: scale, height: scale, maintainAspect: true);
+    }
 
-    data = encodeJpg(image, quality: 80);
-    uri = null;
-    size = null;
+    if (image.hasAlpha) {
+      data = encodePng(image, level: 6);
+    } else {
+      data = encodeJpg(image, quality: 75);
+    }
   }
 
   static OPAFImage parse(XmlElement node, String? dir) {
