@@ -268,21 +268,6 @@ static String? parseUri(String uri, String? dir) {
     return false;
   }
 
-  static int addIdAttribute(List<XmlElement> nodes, List<String> names, int num) {
-    for (var n in nodes) {
-      if (names.contains(n.localName)) {
-        num += 1;
-        n.setAttribute('id', num.toString());
-      }
-
-      if (n.childElements.isNotEmpty) {
-        num = addIdAttribute(n.childElements.toList(), names, num);
-      }
-    }
-
-    return num;
-  }
-
   static void addChartAttribute(List<XmlElement> nodes, String name, int row) {
     for (var n in nodes) {
       if (n.localName == 'action') {
