@@ -139,7 +139,7 @@ class OPAFProject {
       int count = 0;
       var rs = [];
 
-      rs.addAll(c.findAllElements('row'));
+      rs.addAll(c.findAllElements('instruction'));
 
       if (rs.isEmpty) {
         continue;

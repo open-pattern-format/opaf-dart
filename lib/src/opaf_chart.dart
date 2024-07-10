@@ -19,6 +19,7 @@ import 'package:xml/xml.dart';
 
 import 'opaf_exceptions.dart';
 import 'opaf_utils.dart';
+import 'pattern/row.dart';
 
 class OPAFChart {
 
@@ -29,7 +30,7 @@ class OPAFChart {
   ];
 
   String name;
-  List<String> rows;
+  List<ChartRow> rows;
 
   OPAFChart(this.name, this.rows);
 
@@ -52,19 +53,21 @@ class OPAFChart {
     // Check node
     OPAFUtils.checkNode(node, chartNodes);
     
-    String name = node.getAttribute("name") as String;
+    OPAFChart chart = OPAFChart(
+      node.getAttribute("name") as String,
+      [],
+    );
     
     // Rows
-    List<String> rows = [];
     for (var e in node.childElements) {
-      rows.add(e.toXmlString());
+      chart.rows.add(ChartRow.parse(e));
     }
 
-    if (rows.isEmpty) {
-      print("Chart with name '$name' is empty or contains no valid rows");
+    if (chart.rows.isEmpty) {
+      print("Chart with name ${chart.name} is empty or contains no valid rows");
       throw OPAFParserException();
     }
 
-    return OPAFChart(name, rows);
+    return chart;
   }
 }

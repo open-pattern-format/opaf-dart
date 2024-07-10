@@ -40,6 +40,13 @@ export 'src/opaf_project.dart' show OPAFProject;
 export 'src/opaf_utils.dart' show OPAFUtils;
 export 'src/opaf_value.dart' show OPAFValue;
 
+export 'src/pattern/action.dart' show PatternAction;
+export 'src/pattern/block.dart' show PatternBlock;
+export 'src/pattern/element.dart' show PatternElement;
+export 'src/pattern/image.dart' show PatternImage;
+export 'src/pattern/instruction.dart' show PatternInstruction;
+export 'src/pattern/repeat.dart' show PatternRepeat;
+export 'src/pattern/row.dart' show ChartRow;
+export 'src/pattern/text.dart' show PatternText;
 
-export 'src/metadata/designer.dart' show Designer;
 

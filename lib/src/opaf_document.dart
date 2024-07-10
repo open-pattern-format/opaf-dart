@@ -97,7 +97,7 @@ class OPAFDocument {
           }
 
           for (var e in a.elements) {
-            builder.xml(e);
+            e.toXml(builder, actionDefinition: true);
           }
         });
       }
@@ -160,7 +160,7 @@ class OPAFDocument {
           builder.attribute('name', c.name);
 
           for (var r in c.rows) {
-            builder.xml(r);
+            r.toXml(builder);
           }
         });
       }
@@ -175,7 +175,7 @@ class OPAFDocument {
           }
 
           for (var e in b.elements) {
-            builder.xml(e);
+            e.toXml(builder);
           }
         });
       }
@@ -186,7 +186,7 @@ class OPAFDocument {
           builder.attribute('name', c.name);
           
           if (c.uniqueId.isNotEmpty) {
-            builder.attribute('unique_id', uniqueId);
+            builder.attribute('unique_id', c.uniqueId);
           }
 
           if (c.condition != null) {
@@ -194,7 +194,7 @@ class OPAFDocument {
           }
 
           for (var e in c.elements) {
-            builder.xml(e);
+            e.toXml(builder);
           }
         });
       }

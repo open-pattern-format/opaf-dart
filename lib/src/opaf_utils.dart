@@ -116,10 +116,9 @@ static String? parseUri(String uri, String? dir) {
     return toBoolean(result.toLowerCase());
   }
 
-  static bool evaluateNodeCondition(XmlElement node, Map<String, dynamic> values) {
-    if (node.getAttribute("condition") != null) {
-        var condition = node.getAttribute("condition") as String;
-        return evaluateCondition(condition, values);
+  static bool evaluateNodeCondition(String? condition, Map<String, dynamic> values) {
+    if (condition != null) {
+      return evaluateCondition(condition, values);
     }
 
     return true;
@@ -317,27 +316,28 @@ static String? parseUri(String uri, String? dir) {
     return count;
   }
 
-  static int getChartColumnCount(List<String> rows) {
+  static int getActionTotal(List<dynamic> actions) {
+    int aCount = 0;
+
+    for (var a in actions) {
+      if (a is PatternAction) {
+        aCount += int.tryParse(a.total ?? '0') ?? 0;
+      } else if (a is PatternRepeat) {
+        aCount += getActionTotal(a.elements);
+      }
+    }
+
+    return aCount;
+  }
+
+  static int getChartColumnCount(List<ChartRow> rows) {
     int maxCount = 0;
 
     for (var r in rows) {
-      int rCount = 0;
+      int rCount = getActionTotal(r.elements);
 
-      XmlDocumentFragment row = XmlDocumentFragment.parse(r);
-
-      for (var c in row.childElements) {
-        for (var a in c.findAllElements('action')) {
-          // Special case for 'none'
-          if (a.getAttribute('name') == 'none') {
-            rCount += int.tryParse(a.getAttribute('count') ?? '0') ?? 0;
-          } else {
-            rCount += int.tryParse(a.getAttribute('total') ?? '0') ?? 0;
-          }
-        }
-
-        if (rCount > maxCount) {
-          maxCount = rCount;
-        }
+      if (rCount > maxCount) {
+        maxCount = rCount;
       }
     }
 

@@ -26,6 +26,13 @@ import 'opaf_component.dart';
 import 'opaf_document.dart';
 import 'opaf_exceptions.dart';
 import 'opaf_utils.dart';
+import 'pattern/action.dart';
+import 'pattern/block.dart';
+import 'pattern/image.dart';
+import 'pattern/instruction.dart';
+import 'pattern/repeat.dart';
+import 'pattern/row.dart';
+import 'pattern/text.dart';
 
 
 class OPAFCompiler {
@@ -90,38 +97,29 @@ class OPAFCompiler {
     }
   }
 
-  List<XmlElement> processAction(XmlElement node, Map<String, dynamic> values) {
+  List<XmlElement> processAction(PatternAction a, Map<String, dynamic> values) {
     // Get action object
-    if (node.getAttribute('name') == null) {
-      print("Attribute 'name' not found for action node");
-      return [];
-    }
-
-    String name = node.getAttribute('name') as String;
-    OPAFAction? action = opafDoc.getOpafAction(name);
+    OPAFAction? action = opafDoc.getOpafAction(a.name);
 
     if (action == null) {
-      print("Action with name '$name' could not be found.");
+      print("Action with name ${a.name} could not be found.");
       return [];
     }
 
     // Process parameters
-    var params = Map.of(action.params);
-
-    for (var a in node.attributes) {
-      if (protectedAttributes.contains(a.localName)) {
-        continue;
+    Map<String, dynamic> params = Map.of(action.params);
+    for (var p in params.keys) {
+      if (a.params.containsKey(p)) {
+        params[p] = OPAFUtils.strToNum(
+          OPAFUtils.evaluateExpr(a.params[p], values)
+        );
       }
-
-      params[a.localName] = OPAFUtils.strToNum(
-        OPAFUtils.evaluateExpr(a.value, values)
-      );
     }
 
     // Check parameters
     for (var p in params.keys) {
       if (params[p] == "") {
-        print("Parameter '$p' is not defined for action '$name'");
+        print("Parameter '$p' is not defined for action '${action.name}'");
         throw OPAFNotDefinedException();
       }
     }
@@ -131,100 +129,76 @@ class OPAFCompiler {
     List<XmlElement> nodes = [];
     
     for (var e in action.elements) {
-      XmlDocumentFragment f = XmlDocumentFragment.parse(e);
-
-      for (var c in f.childElements) {
-        // Check condition
-        if (!OPAFUtils.evaluateNodeCondition(c, params)) {
-          continue;
-        }
-
-        c.removeAttribute("condition");
-
-        // Evaluate attributes
-        for (var a in c.attributes) {
-          c.setAttribute(a.localName, OPAFUtils.evaluateExpr(a.value, params));
-        }
-
-        if (params.containsKey('chart')) {
-          c.setAttribute('chart', params['chart']);
-        }
-        
-        nodes.add(c);
+      // Check condition
+      if (!OPAFUtils.evaluateNodeCondition(e.condition, params)) {
+        continue;
       }
+      
+      XmlElement element = XmlElement(XmlName("action"));
+      element.setAttribute('name', OPAFUtils.evaluateExpr(e.name, params));
+
+      // Evaluate attributes
+      for (var a in e.params.keys) {
+        element.setAttribute(a, OPAFUtils.evaluateExpr(e.params[a], params));
+      }
+
+      if (a.chart != null) {
+        element.setAttribute('chart', a.chart as String);
+      }
+
+      if (e.total != null) {
+        element.setAttribute('total', OPAFUtils.evaluateExpr(e.total!, params));
+      }
+      
+      nodes.add(element);
     }
 
     return nodes;
   }
 
-  List<XmlElement> processImage(XmlElement node) {
-    if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from image node");
-      return [];
-    }
-
-    String name = node.getAttribute('name') as String;
-
-    if (opafDoc.getOpafImageByName(name) == null) {
-      print("Unable to find image with name '$name'");
+  List<XmlElement> processImage(PatternImage image) {
+    if (opafDoc.getOpafImageByName(image.name) == null) {
+      print("Unable to find image with name '${image.name}'");
       return [];
     }
 
     final builder = XmlBuilder();
   
     builder.element("image", nest: () {
-      builder.attribute("name", name);
+      builder.attribute("name", image.name);
 
-      if (node.getAttribute("tag") != null) {
-        builder.attribute("tag", node.getAttribute("tag") as String);
-      }
-
-      if (node.getAttribute("caption") != null) {
-        builder.attribute("caption", node.getAttribute("caption") as String);
+      if (image.caption != null) {
+        builder.attribute("caption", image.caption as String);
       }
     });
 
     return builder.buildFragment().childElements.toList();
   }
 
-  List<XmlElement> processText(XmlElement node, Map<String, dynamic> values) {
+  List<XmlElement> processText(PatternText element, Map<String, dynamic> values) {
     final builder = XmlBuilder();
 
     builder.element("text", nest: () {
-      if (node.getAttribute("data") != null) {
-        builder.attribute(
-          "data",
-          OPAFUtils.evaluateExpr(node.getAttribute("data") as String, values)
-        );
-      }
+      builder.attribute(
+        "data",
+        OPAFUtils.evaluateExpr(element.data, values)
+      );
     });
 
     return builder.buildFragment().childElements.toList();
    }
 
-  List<XmlElement> processInstruction(XmlElement node, Map<String, dynamic> values) {
-    // Check type
-    if (node.getAttribute("type") == null) {
-      print("Instruction attribute 'type' not found.");
-      throw OPAFInvalidException();
-    }
-
+  List<XmlElement> processInstruction(PatternInstruction instruction, Map<String, dynamic> values) {
     List<XmlElement> nodes = [];
 
-    for (var c in node.childElements) {
-      nodes.addAll(processNode(c, values));
+    for (var c in instruction.elements) {
+      nodes.addAll(processElement(c, values));
     }
 
     final builder = XmlBuilder();
     builder.element("instruction", nest: () {
-      builder.attribute("type", node.getAttribute("type"));
-
-      for (var a in node.attributes) {
-        if (protectedAttributes.contains(a.localName)) {
-          continue;
-        }
-
-        builder.attribute(a.localName, OPAFUtils.evaluateExpr(a.value, values));
+      if (instruction.name != null) {
+        builder.attribute("name", OPAFUtils.evaluateExpr(instruction.name as String, values));
       }
 
       for (var n in nodes) {
@@ -235,28 +209,16 @@ class OPAFCompiler {
     return builder.buildFragment().childElements.toList();
   }
 
-  List<XmlElement> processRepeat(XmlElement node, Map<String, dynamic> values) {
-    // Check count
-    if (node.getAttribute("count") == null) {
-      print("Repeat attribute 'count' not found.");
-      throw OPAFInvalidException();
-    }
-
+  List<XmlElement> processRepeat(PatternRepeat repeat, Map<String, dynamic> values) {
     List<XmlElement> nodes = [];
 
-    for (var c in node.childElements) {
-      nodes.addAll(processNode(c, values));
+    for (var e in repeat.elements) {
+      nodes.addAll(processElement(e, values));
     }
 
     final builder = XmlBuilder();
     builder.element("repeat", nest: () {
-      for (var a in node.attributes) {
-        if (protectedAttributes.contains(a.localName)) {
-          continue;
-        }
-
-        builder.attribute(a.localName, OPAFUtils.evaluateExpr(a.value, values));
-      }
+      builder.attribute('count', OPAFUtils.evaluateExpr(repeat.count, values));
 
       for (var n in nodes) {
         builder.xml(n.toXmlString());
@@ -266,30 +228,16 @@ class OPAFCompiler {
     return builder.buildFragment().childElements.toList();
   }
 
-  List<XmlElement> processRow(XmlElement node, Map<String, dynamic> values) {
-    // Check type
-    if (node.getAttribute("type") == null) {
-      print("Row attribute 'type' not found.");
-      throw OPAFInvalidException();
-    }
-
+  List<XmlElement> processRow(ChartRow row, Map<String, dynamic> values) {
     List<XmlElement> nodes = [];
 
-    for (var c in node.childElements) {
-      nodes.addAll(processNode(c, values));
+    for (var e in row.elements) {
+      nodes.addAll(processElement(e, values));
     }
 
     final builder = XmlBuilder();
     builder.element("row", nest: () {
-      builder.attribute("type", node.getAttribute("type"));
-
-      for (var a in node.attributes) {
-        if (protectedAttributes.contains(a.localName)) {
-          continue;
-        }
-
-        builder.attribute(a.localName, OPAFUtils.evaluateExpr(a.value, values));
-      }
+      builder.attribute("type", row.type);
 
       for (var n in nodes) {
         builder.xml(n.toXmlString());
@@ -299,36 +247,28 @@ class OPAFCompiler {
     return builder.buildFragment().childElements.toList();
   }
 
-  List<XmlElement> processBlock(node, values) {
-    if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from block node");
-      return [];
-    }
-
-    String name = node.getAttribute("name");
-    OPAFBlock? block = opafDoc.getOpafBlock(name);
+  List<XmlElement> processBlock(PatternBlock element, values) {
+    OPAFBlock? block = opafDoc.getOpafBlock(element.name);
 
     if (block == null) {
-      print("Unable to find block with name '$name'");
+      print("Unable to find block with name '${element.name}'");
       return [];
     }
 
     Map<String, dynamic> params = Map.of(block.params);
 
-    for (var a in node.attributes) {
-      if (protectedAttributes.contains(a.localName)) {
-        continue;
+    for (var p in params.keys) {
+      if (element.params.containsKey(p)) {
+        params[p] = OPAFUtils.strToNum(
+          OPAFUtils.evaluateExpr(element.params[p], values)
+        );
       }
-
-      params[a.localName] = OPAFUtils.strToNum(
-        OPAFUtils.evaluateExpr(a.value, values)
-      );
     }
 
     // Check parameters
     for (var p in params.keys) {
       if (params[p] == "") {
-        print("Parameter '$p' is not defined for block '$name'");
+        print("Parameter '$p' is not defined for block '${block.name}'");
         throw OPAFNotDefinedException();
       }
     }
@@ -340,11 +280,7 @@ class OPAFCompiler {
     List<XmlElement> nodes = [];
 
     for (var e in block.elements) {
-      var element = XmlDocumentFragment.parse(e);
-
-      for (var ec in element.childElements) {
-        nodes.addAll(processNode(ec, params));
-      }
+      nodes.addAll(processElement(e, params));
     }
 
     final builder = XmlBuilder();
@@ -356,24 +292,24 @@ class OPAFCompiler {
     return builder.buildFragment().childElements.toList();
   }
 
-  List<XmlElement> processNode(XmlElement node, Map<String, dynamic> values) {
+  List<XmlElement> processElement(dynamic element, Map<String, dynamic> values) {
     List<XmlElement> nodes = [];
   
-    if (OPAFUtils.evaluateNodeCondition(node, values)) {
-      if (node.localName == 'action') {
-        nodes.addAll(processAction(node, values));
-      } else if (node.localName == "image") {
-        nodes.addAll(processImage(node));
-      } else if (node.localName == "text") {
-        nodes.addAll(processText(node, values));
-      } else if (node.localName == "block") {
-        nodes.addAll(processBlock(node, values));
-      } else if (node.localName == "instruction") {
-        nodes.addAll(processInstruction(node, values));
-      } else if (node.localName == "row") {
-        nodes.addAll(processRow(node, values));
-      } else if (node.localName == "repeat") {
-        nodes.addAll(processRepeat(node, values));
+    if (OPAFUtils.evaluateNodeCondition(element.condition, values)) {
+      if (element is PatternAction) {
+        nodes.addAll(processAction(element, values));
+      } else if (element is PatternImage) {
+        nodes.addAll(processImage(element));
+      } else if (element is PatternText) {
+        nodes.addAll(processText(element, values));
+      } else if (element is PatternBlock) {
+        nodes.addAll(processBlock(element, values));
+      } else if (element is PatternInstruction) {
+        nodes.addAll(processInstruction(element, values));
+      } else if (element is ChartRow) {
+        nodes.addAll(processRow(element, values));
+      } else if (element is PatternRepeat) {
+        nodes.addAll(processRepeat(element, values));
       }
     }
 
@@ -384,23 +320,16 @@ class OPAFCompiler {
     List<XmlElement> nodes = [];
 
     for (var e in c.elements) {
-      XmlDocumentFragment f = XmlDocumentFragment.parse(e);
-
-      for (var n in f.childElements) {
-        nodes.addAll(processNode(n, globalValues));
-      }
+      nodes.addAll(processElement(e, globalValues));
     }
-
-    // Row IDs
-    OPAFUtils.addIdAttribute(nodes, ["row"], 0);
 
     final builder = XmlBuilder();
     builder.element("component", nest: () {
         builder.attribute("name", c.name);
         builder.attribute("unique_id", c.uniqueId);
 
-        for (var c in nodes) {
-          builder.xml(c.toXmlString());
+        for (var n in nodes) {
+          builder.xml(n.toXmlString());
         }
     });
     
@@ -461,11 +390,7 @@ class OPAFCompiler {
           builder.attribute('name', chart.name);
 
           for (var r in chart.rows) {
-            var row = XmlDocumentFragment.parse(r);
-
-            for (var c in row.childElements) {
-              chartNodes.addAll(processNode(c, globalValues));
-            }
+            chartNodes.addAll(processElement(r, globalValues));
           }
 
           for (var n in chartNodes) {
@@ -475,12 +400,16 @@ class OPAFCompiler {
       }
 
       // Process components
-      for (var c in opafDoc.opafComponents){
+      print(opafDoc.opafComponents.length.toString());
+      for (var c in opafDoc.opafComponents) {
+        print(c.name.toUpperCase());
         if (c.condition != null) {
           if (!OPAFUtils.evaluateCondition(c.condition as String, globalValues)) {
             continue;
           }
         }
+
+        print("YES");
 
         List<XmlElement> elements = processComponent(c);
 

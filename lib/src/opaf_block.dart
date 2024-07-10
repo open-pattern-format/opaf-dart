@@ -15,16 +15,22 @@
  *
  */
 
+import 'package:opaf/src/pattern/image.dart';
+import 'package:opaf/src/pattern/instruction.dart';
 import 'package:xml/xml.dart';
 
 import 'opaf_exceptions.dart';
 import 'opaf_utils.dart';
+import 'pattern/action.dart';
+import 'pattern/block.dart';
+import 'pattern/repeat.dart';
+import 'pattern/text.dart';
 
 class OPAFBlock {
 
   String name;
   Map<String, dynamic> params;
-  List<String> elements;
+  List<dynamic> elements;
 
   OPAFBlock(this.name, this.params, this.elements);
 
@@ -46,35 +52,52 @@ class OPAFBlock {
   
     // Check node
     OPAFUtils.checkNode(node, []);
-    
-    String name = node.getAttribute("name") as String;
 
+    OPAFBlock block = OPAFBlock(
+      node.getAttribute("name") as String,
+      {},
+      [],
+    );
+    
     // Params
-    Map<String, dynamic> params = {};
     if (node.getAttribute('params') != null) {
       String paramsAttr = node.getAttribute('params') as String;
 
       for (var param in paramsAttr.split(" ")) {
           if (param.contains('=')) {
               var paramList = param.split('=');
-              params[paramList[0]] = OPAFUtils.strToNum(paramList[1]);
+              block.params[paramList[0]] = OPAFUtils.strToNum(paramList[1]);
           } else {
-              params[param] = '';
+              block.params[param] = '';
           }
       }
     }
     
     // Elements
-    List<String> elements = [];
-    for (var e in node.childElements) {
-      elements.add(e.toXmlString());
+    for (var n in node.childElements) {
+      if (n.localName == 'instruction') {
+        block.elements.add(PatternInstruction.parse(n));
+      } else if (n.localName == "text") {
+        block.elements.add(PatternText.parse(n));
+      } else if (n.localName == "repeat") {
+        block.elements.add(PatternRepeat.parse(n));
+      } else if (n.localName == "block") {
+        block.elements.add(PatternBlock.parse(n));
+      } else if (n.localName == "image") {
+        block.elements.add(PatternImage.parse(n));
+      } else if (n.localName == "action") {
+        block.elements.add(PatternAction.parse(n));
+      } else {
+        print("Block does not support '${n.localName}' nodes");
+        throw OPAFParserException();
+      }
     }
 
-    if (elements.isEmpty) {
-      print("Block with name '$name' is empty or contains no valid elements");
+    if (block.elements.isEmpty) {
+      print("Block with name '${block.name}' is empty or contains no valid elements");
       throw OPAFParserException();
     }
 
-    return OPAFBlock(name, params, elements);
+    return block;
   }
 }

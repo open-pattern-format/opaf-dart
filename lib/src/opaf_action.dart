@@ -19,12 +19,13 @@ import 'package:xml/xml.dart';
 
 import 'opaf_exceptions.dart';
 import 'opaf_utils.dart';
+import 'pattern/action.dart';
 
 class OPAFAction {
 
   String name;
   Map<String, dynamic> params;
-  List<String> elements;
+  List<PatternAction> elements;
 
   OPAFAction(this.name, this.params, this.elements);
 
@@ -43,37 +44,40 @@ class OPAFAction {
       print("Name attribute not found for action");
       throw OPAFParserException();
     }
+
+    OPAFAction action = OPAFAction(
+      node.getAttribute("name") as String,
+      {},
+      [],
+    );
     
-    String name = node.getAttribute("name") as String;
 
     // Params
-    Map<String, dynamic> params = {};
     if (node.getAttribute('params') != null) {
       String paramsAttr = node.getAttribute('params') as String;
 
       for (var param in paramsAttr.split(" ")) {
           if (param.contains('=')) {
               var paramList = param.split('=');
-              params[paramList[0]] = OPAFUtils.strToNum(paramList[1]);
+              action.params[paramList[0]] = OPAFUtils.strToNum(paramList[1]);
           } else {
-              params[param] = '';
+              action.params[param] = '';
           }
       }
     }
     
     // Elements
-    List<String> elements = [];
     for (var e in node.childElements) {
       if (e.name.local == 'action') {
-        elements.add(e.toXmlString());
+        action.elements.add(PatternAction.parse(e));
       }
     }
 
-    if (elements.isEmpty) {
-      print("No actions found for action '$name'");
+    if (action.elements.isEmpty) {
+      print("No actions found for action '${action.name}'");
       throw OPAFParserException();
     }
 
-    return OPAFAction(name, params, elements);
+    return action;
   }
 }

@@ -186,10 +186,14 @@ class OPAFParser {
   OPAFParser parseOpafComponents() {
     var elements = xmlDoc.rootElement.findElements('opaf:component');
 
+    print(elements.length.toString());
+
     for (var element in elements) {
       var component = OPAFComponent.parse(element);
       opafDoc.addOpafComponent(component);
     }
+
+    print(opafDoc.opafComponents.length.toString());
 
     return this;
   }

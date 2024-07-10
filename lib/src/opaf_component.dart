@@ -15,17 +15,24 @@
  *
  */
 
+import 'package:opaf/src/pattern/image.dart';
+import 'package:uuid/data.dart';
+import 'package:uuid/rng.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
 import 'opaf_exceptions.dart';
 import 'opaf_utils.dart';
+import 'pattern/block.dart';
+import 'pattern/instruction.dart';
+import 'pattern/repeat.dart';
+import 'pattern/text.dart';
 
 class OPAFComponent {
 
   String name;
   String uniqueId;
-  List<String> elements;
+  List<dynamic> elements;
   String? condition;
 
   OPAFComponent(this.name, this.uniqueId, this.elements, this.condition);
@@ -48,24 +55,37 @@ class OPAFComponent {
   
     // Check node
     OPAFUtils.checkNode(node, []);
-    
-    String name = node.getAttribute("name") as String;
-    String uniqueId = node.getAttribute("unique_id") ?? Uuid().v4();
+
+    OPAFComponent component = OPAFComponent(
+      node.getAttribute("name") as String,
+      node.getAttribute("unique_id") ?? Uuid(goptions: GlobalOptions(CryptoRNG())).v4(),
+      [],
+      node.getAttribute('condition'),
+    );
     
     // Elements
-    List<String> elements = [];
-    for (var e in node.childElements) {
-      elements.add(e.toXmlString());
+    for (var n in node.childElements) {
+      if (n.localName == 'instruction') {
+        component.elements.add(PatternInstruction.parse(n));
+      } else if (n.localName == "text") {
+        component.elements.add(PatternText.parse(n));
+      } else if (n.localName == "repeat") {
+        component.elements.add(PatternRepeat.parse(n));
+      } else if (n.localName == "block") {
+        component.elements.add(PatternBlock.parse(n));
+      } else if (n.localName == "image") {
+        component.elements.add(PatternImage.parse(n));
+      } else {
+        print("Component does not support '${n.localName}' nodes");
+        throw OPAFParserException();
+      }
     }
 
-    if (elements.isEmpty) {
-      print("Component with name '$name' is empty or contains no valid elements");
+    if (component.elements.isEmpty) {
+      print("Component with name '$component.name' is empty or contains no valid elements");
       throw OPAFParserException();
     }
 
-    // Condition
-    String? condition = node.getAttribute('condition');
-
-    return OPAFComponent(name, uniqueId, elements, condition);
+    return component;
   }
 }
