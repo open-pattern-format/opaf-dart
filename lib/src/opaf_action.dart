@@ -26,6 +26,7 @@ class OPAFAction {
   String name;
   Map<String, dynamic> params;
   List<PatternAction> elements;
+  bool custom = false;
 
   OPAFAction(this.name, this.params, this.elements);
 
@@ -76,6 +77,10 @@ class OPAFAction {
     if (action.elements.isEmpty) {
       print("No actions found for action '${action.name}'");
       throw OPAFParserException();
+    }
+
+    if (node.getAttribute('custom') != null) {
+      action.custom = bool.parse(node.getAttribute('custom') as String, caseSensitive: false);
     }
 
     return action;

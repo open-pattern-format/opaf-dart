@@ -91,6 +91,7 @@ class OPAFDocument {
       for (var a in opafActions) {
         builder.element('opaf:define_action', nest: () {
           builder.attribute('name', a.name);
+          builder.attribute('custom', a.custom.toString());
           
           if (a.params.isNotEmpty) {
             builder.attribute('params', OPAFUtils.paramsToString(a.params));
