@@ -17,11 +17,15 @@
 
 import 'dart:convert';
 
+import 'package:opaf/src/opaf_chart.dart';
+import 'package:opaf/src/opaf_config.dart';
+import 'package:opaf/src/opaf_value.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
 import 'opaf_action.dart';
 import 'opaf_block.dart';
+import 'opaf_color.dart';
 import 'opaf_component.dart';
 import 'opaf_document.dart';
 import 'opaf_exceptions.dart';
@@ -49,52 +53,73 @@ class OPAFCompiler {
 
   OPAFCompiler(this.opafDoc, this.customConfig);
 
-  void processConfig(XmlBuilder builder) {
+  List<XmlElement> processConfigs() {
+    List<XmlElement> elements = [];
+
     for (var c in opafDoc.opafConfigs) {
-      if (customConfig.keys.contains(c.name)) {
-        if (c.allowedValues.isNotEmpty && !c.allowedValues.contains(customConfig[c.name])) {
-          print("${customConfig[c.name]} is not a valid value for ${c.name}");
-          throw OPAFInvalidException();
-        }
-
-        globalValues[c.name] = OPAFUtils.strToNum(customConfig[c.name]);
-      } else {
-        globalValues[c.name] = OPAFUtils.strToNum(
-          OPAFUtils.evaluateExpr(c.value, globalValues)
-        );
-      }
-
-      // Add config to project
-      builder.element("config", nest:() {
-        builder.attribute("name", c.name);
-        builder.attribute("value", globalValues[c.name].toString());
-      });
+      elements.add(processConfig(c));
     }
+
+    return elements;
   }
 
-  void processValues(XmlBuilder builder) {
-    for (var v in opafDoc.opafValues) {
-      // Check condition
-      if (v.condition != null) {
-        if (!OPAFUtils.evaluateCondition(v.condition as String, globalValues)) {
-          continue;
-        }
+  XmlElement processConfig(OPAFConfig config) {
+    if (customConfig.keys.contains(config.name)) {
+      if (config.allowedValues.isNotEmpty && !config.allowedValues.contains(customConfig[config.name])) {
+        print("${customConfig[config.name]} is not a valid value for ${config.name}");
+        throw OPAFInvalidException();
       }
 
-      globalValues[v.name] = OPAFUtils.strToNum(
-        OPAFUtils.evaluateExpr(v.value, globalValues)
+      globalValues[config.name] = OPAFUtils.strToNum(customConfig[config.name]);
+    } else {
+      globalValues[config.name] = OPAFUtils.strToNum(
+        OPAFUtils.evaluateExpr(config.value, globalValues)
       );
     }
+
+    XmlElement element = XmlElement(XmlName("config"));
+    element.setAttribute('name', config.name);
+    element.setAttribute('value', globalValues[config.name].toString());
+  
+    return element;
   }
 
-  void processColors(XmlBuilder builder) {
-    for (var c in opafDoc.opafColors) {
-      builder.element("color", nest:() {
-        builder.attribute('name', c.name);
-        builder.attribute('value', c.value);
-        builder.attribute('description', c.description);
-      });
+  void processValues() {
+    for (var v in opafDoc.opafValues) {
+      processValue(v);
     }
+  }
+
+  void processValue(OPAFValue value) {
+    // Check condition
+    if (value.condition != null) {
+      if (!OPAFUtils.evaluateCondition(value.condition as String, globalValues)) {
+        return;
+      }
+    }
+
+    globalValues[value.name] = OPAFUtils.strToNum(
+      OPAFUtils.evaluateExpr(value.value, globalValues)
+    );
+  }
+
+  List<XmlElement> processColors() {
+    List<XmlElement> elements = [];
+
+    for (var c in opafDoc.opafColors) {
+      elements.add(processColor(c));
+    }
+
+    return elements;
+  }
+
+  XmlElement processColor(OPAFColor color) {
+    XmlElement element = XmlElement(XmlName('color'));
+    element.setAttribute('name', color.name);
+    element.setAttribute('value', color.value);
+    element.setAttribute('description', color.description);
+
+    return element;
   }
 
   List<XmlElement> processAction(PatternAction a, Map<String, dynamic> values) {
@@ -142,12 +167,9 @@ class OPAFCompiler {
         element.setAttribute(a, OPAFUtils.evaluateExpr(e.params[a], params));
       }
 
-      if (a.chart != null) {
-        element.setAttribute('chart', a.chart as String);
-      }
-
-      if (e.total != null) {
-        element.setAttribute('total', OPAFUtils.evaluateExpr(e.total!, params));
+      // Chart attribute
+      if (a.params.containsKey('chart')) {
+        element.setAttribute('chart', OPAFUtils.evaluateExpr(a.params['chart'], params));
       }
       
       nodes.add(element);
@@ -316,8 +338,33 @@ class OPAFCompiler {
     return nodes;
   }
 
+  List<XmlElement> processChart(OPAFChart chart) {
+    var chartNodes = [];
+
+    final builder = XmlBuilder();
+    builder.element("chart", nest: () {
+      builder.attribute('name', chart.name);
+
+      for (var r in chart.rows) {
+        chartNodes.addAll(processElement(r, globalValues));
+      }
+
+      for (var n in chartNodes) {
+        builder.xml(n.toXmlString());
+      }
+    });
+
+    return builder.buildFragment().childElements.toList();
+  }
+
   List<XmlElement> processComponent(OPAFComponent c) {
     List<XmlElement> nodes = [];
+
+    if (c.condition != null) {
+      if (!OPAFUtils.evaluateCondition(c.condition as String, globalValues)) {
+        return nodes;
+      }
+    }
 
     for (var e in c.elements) {
       nodes.addAll(processElement(e, globalValues));
@@ -337,10 +384,6 @@ class OPAFCompiler {
   }
 
   XmlDocument compile() {
-    if (opafDoc.pkgVersion == null) {
-      throw OPAFNotPackagedException();
-    }
-
     if (!customConfig.containsKey('name')) {
       throw OPAFInvalidException();
     }
@@ -378,42 +421,28 @@ class OPAFCompiler {
         });
       });
 
-      processConfig(builder);
-      processValues(builder);
-      processColors(builder);
+      // Process configs
+      for (var c in processConfigs()) {
+        builder.xml(c.toXmlString());
+      }
+
+      processValues();
+      
+      // Process Colors
+      for (var c in processColors()) {
+        builder.xml(c.toXmlString());
+      }
 
       // Process charts
       for (var chart in opafDoc.opafCharts) {
-        var chartNodes = [];
-
-        builder.element("chart", nest: () {
-          builder.attribute('name', chart.name);
-
-          for (var r in chart.rows) {
-            chartNodes.addAll(processElement(r, globalValues));
-          }
-
-          for (var n in chartNodes) {
-            builder.xml(n.toXmlString());
-          }
-        });
+        for (var x in processChart(chart)) {
+          builder.xml(x.toXmlString());
+        }
       }
 
       // Process components
-      print(opafDoc.opafComponents.length.toString());
       for (var c in opafDoc.opafComponents) {
-        print(c.name.toUpperCase());
-        if (c.condition != null) {
-          if (!OPAFUtils.evaluateCondition(c.condition as String, globalValues)) {
-            continue;
-          }
-        }
-
-        print("YES");
-
-        List<XmlElement> elements = processComponent(c);
-
-        for (var e in elements) {
+        for (var e in processComponent(c)) {
           builder.xml(e.toXmlString());
         }
       }

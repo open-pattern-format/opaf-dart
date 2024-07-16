@@ -306,7 +306,7 @@ static String? parseUri(String uri, String? dir) {
 
     for (var a in actions) {
       if (a is PatternAction) {
-        aCount += int.tryParse(a.total ?? '0') ?? 0;
+        aCount += int.tryParse(a.params['total'] ?? '0') ?? 0;
       } else if (a is PatternRepeat) {
         aCount += getActionTotal(a.elements);
       }

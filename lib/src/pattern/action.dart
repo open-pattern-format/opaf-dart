@@ -24,8 +24,6 @@ class PatternAction extends PatternElement {
 
   String name;
   Map<String, dynamic> params;
-  String? total;
-  String? chart;
 
   PatternAction(this.name, this.params);
 
@@ -36,14 +34,6 @@ class PatternAction extends PatternElement {
 
       for (var p in params.keys) {
         builder.attribute(p, params[p]);
-      }
-
-      if (total != null) {
-        builder.attribute("total", total);
-      }
-
-      if (chart != null) {
-        builder.attribute("chart", chart);
       }
 
       if (condition != null) {
@@ -77,12 +67,8 @@ class PatternAction extends PatternElement {
     for (var a in node.attributes) {
       if (a.localName == 'name') {
         continue;
-      } else if (a.localName == 'chart') {
-        action.chart = a.value;
       } else if (a.localName == 'condition') {
         action.condition = a.value;
-      } else if (a.localName == 'total') {
-        action.total = a.value;
       } else {
         action.params[a.localName] = a.value;
       }
