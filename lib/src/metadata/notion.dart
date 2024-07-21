@@ -38,18 +38,15 @@ class Notion {
 
   static parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'notion') {
-      print("Expected node with name 'notion' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'notion' and got '${node.name}'");
     }
 
     if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from 'notion' element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'name' missing from 'notion' element");
     }
 
     Notion notion = Notion(node.getAttribute('name') as String);

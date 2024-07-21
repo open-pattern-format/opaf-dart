@@ -66,8 +66,7 @@ class MetadataUtils {
       }
 
       if (!supportedNodes.contains(child.name.local)) {
-          print("Node with name '${child.name.local}' not recognized");
-          throw OPAFParserException();
+          throw OPAFParserException("Node with name '${child.name.local}' not recognized");
       }
 
       if (textNodes.contains(child.name.local)) {

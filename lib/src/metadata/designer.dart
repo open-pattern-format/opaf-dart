@@ -55,18 +55,15 @@ class Designer {
 
   static Designer parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'designer') {
-      print("Expected node with name 'designer' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'designer' and got '${node.name}'");
     }
 
     if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from designer element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'name' missing from designer element");
     }
 
     String name = node.getAttribute('name') as String;

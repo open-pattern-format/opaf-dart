@@ -46,20 +46,32 @@ class PatternRepeat extends PatternElement {
     });
   }
 
+  PatternRepeat clone() {
+    PatternRepeat newRepeat = PatternRepeat(
+      count,
+      []
+    );
+
+    newRepeat.condition = condition;
+
+    for (var e in elements) {
+      newRepeat.elements.add(e.clone());
+    }
+
+    return newRepeat;
+  }
+
   static PatternRepeat parse(XmlElement node, {bool instructionRepeat=false, bool chartRepeat=false}) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'repeat') {
-      print("Expected node with name 'opaf:repeat' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:repeat' and got '${node.name}'");
     }
 
     if (node.getAttribute('count') == null) {
-      print("Attribute 'count' missing from repeat element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'count' missing from repeat element");
     }
   
     PatternRepeat repeat = PatternRepeat(node.getAttribute("count") as String, []);
@@ -78,15 +90,13 @@ class PatternRepeat extends PatternElement {
         } else if (n.localName == "repeat") {
           repeat.elements.add(PatternRepeat.parse(n, instructionRepeat: true));
         } else {
-          print("Instruction repeat does not support '${n.localName}' nodes");
-          throw OPAFParserException();
+          throw OPAFParserException("Instruction repeat does not support '${n.localName}' nodes");
         }
       } else if (chartRepeat) {
         if (n.localName == "action") {
           repeat.elements.add(PatternAction.parse(n));
         } else {
-          print("Chart repeat does not support '${n.localName}' nodes");
-          throw OPAFParserException();
+          throw OPAFParserException("Chart repeat does not support '${n.localName}' nodes");
         }
       } else {
         if (n.localName == 'instruction') {
@@ -102,8 +112,7 @@ class PatternRepeat extends PatternElement {
         } else if (n.localName == "action") {
           repeat.elements.add(PatternAction.parse(n));
         } else {
-          print("Repeat does not support '${n.localName}' nodes");
-          throw OPAFParserException();
+          throw OPAFParserException("Repeat does not support '${n.localName}' nodes");
         }
       }
     }

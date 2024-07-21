@@ -46,18 +46,15 @@ class Schematic {
 
   static Schematic parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'schematic') {
-      print("Expected node with name 'schematic' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'schematic' and got '${node.name}'");
     }
 
     if (node.childElements.isEmpty) {
-      print("'schematic' metadata element is empty");
-      throw OPAFParserException();
+      throw OPAFParserException("'schematic' metadata element is empty");
     }
 
     Schematic schematic = Schematic();

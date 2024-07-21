@@ -46,28 +46,23 @@ class Measurement {
 
   static Measurement parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'measurement') {
-      print("Expected node with name 'measurement' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'measurement' and got '${node.name}'");
     }
 
     if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from 'measurement' element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'name' missing from 'measurement' element");
     }
 
     if (node.getAttribute('units') == null) {
-      print("Attribute 'units' missing from 'measurement' element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'units' missing from 'measurement' element");
     }
 
     if (node.getAttribute('value') == null) {
-      print("Attribute 'value' missing from 'measurement' element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'value' missing from 'measurement' element");
     }
 
     String name = node.getAttribute('name') as String;
@@ -75,13 +70,11 @@ class Measurement {
     num? value = num.tryParse(node.getAttribute('value') as String);
 
     if (value == null) {
-      print("Measurement 'value' is not a valid number");
-      throw OPAFParserException();
+      throw OPAFParserException("Measurement 'value' is not a valid number");
     }
 
     if (!supportedUnits.contains(units)) {
-      print("Measurement unit '$units' is not supported");
-      throw OPAFParserException();
+      throw OPAFParserException("Measurement unit '$units' is not supported");
     }
 
     return Measurement(name, units, value);

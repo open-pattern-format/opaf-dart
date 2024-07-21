@@ -179,23 +179,19 @@ class OPAFProject {
     var node = doc.rootElement;
 
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.localName != 'project') {
-      print("Expected node with name 'project' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'project' and got '${node.name}'");
     }
   
     if (node.getAttribute('name') == null) {
-      print("Name attribute not found for project");
-      throw OPAFParserException();
+      throw OPAFParserException("Name attribute not found for project");
     }
 
     if (node.getAttribute('unique_id') == null) {
-      print("Unique ID not defined for project");
-      throw OPAFParserException();
+      throw OPAFParserException("Unique ID not defined for project");
     }
   
     String name = node.getAttribute("name") as String;

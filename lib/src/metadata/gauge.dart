@@ -59,48 +59,40 @@ class Gauge {
 
   static Gauge parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'gauge') {
-      print("Expected node with name 'gauge' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'gauge' and got '${node.name}'");
     }
 
     if (node.getAttribute('units') == null) {
-      print("Attribute 'unit' missing from 'gauge' element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'unit' missing from 'gauge' element");
     }
 
     if (node.getAttribute('width') == null) {
-      print("Attribute 'width' missing from 'gauge' element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'width' missing from 'gauge' element");
     }
 
     if (node.getAttribute('stitches') == null) {
-      print("Attribute 'stitches' missing from 'stitches' element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'stitches' missing from 'stitches' element");
     }
 
     String units = node.getAttribute('units') as String;
 
     if (!supportedUnits.contains(units)) {
-      print("Gauge unit '$units' is not supported");
-      throw OPAFParserException();
+      throw OPAFParserException("Gauge unit '$units' is not supported");
     }
 
     int? width = int.tryParse(node.getAttribute('width') as String);
     int? stitches = int.tryParse(node.getAttribute('stitches') as String);
 
     if (width == null) {
-      print("Gauge attribute 'width' is not valid");
-      throw OPAFParserException();
+      throw OPAFParserException("Gauge attribute 'width' is not valid");
     }
 
     if (stitches == null) {
-      print("Gauge attribute 'stitches' is not valid");
-      throw OPAFParserException();
+      throw OPAFParserException("Gauge attribute 'stitches' is not valid");
     }
 
     Gauge gauge = Gauge(units, width, stitches);

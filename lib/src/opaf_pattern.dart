@@ -40,28 +40,23 @@ class OPAFPattern {
 
   static OPAFPattern parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.localName != 'pattern') {
-      print("Expected node with name 'pattern' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'pattern' and got '${node.name}'");
     }
   
     if (node.getAttribute('name') == null) {
-      print("Name attribute not found for pattern");
-      throw OPAFParserException();
+      throw OPAFParserException("Name attribute not found for pattern");
     }
 
     if (node.getAttribute('unique_id') == null) {
-      print("Unique ID not defined for pattern");
-      throw OPAFParserException();
+      throw OPAFParserException("Unique ID not defined for pattern");
     }
   
     if (node.getAttribute('version') == null) {
-      print("Version not defined for pattern");
-      throw OPAFParserException();
+      throw OPAFParserException("Version not defined for pattern");
     }
   
     String name = node.getAttribute("name") as String;

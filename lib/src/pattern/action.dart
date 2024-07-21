@@ -42,20 +42,28 @@ class PatternAction extends PatternElement {
     });
   }
 
+  PatternAction clone() {
+    PatternAction newAction = PatternAction(
+      name,
+      Map.from(params)
+    );
+
+    newAction.condition = condition;
+
+    return newAction;
+  }
+
   static PatternAction parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'action') {
-      print("Expected node with name 'opaf:action' or 'action' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:action' or 'action' and got '${node.name}'");
     }
   
     if (node.getAttribute('name') == null) {
-      print("Name attribute not found for action");
-      throw OPAFParserException();
+      throw OPAFParserException("Name attribute not found for action");
     }
 
     PatternAction action = PatternAction(

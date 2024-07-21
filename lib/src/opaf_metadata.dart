@@ -124,13 +124,11 @@ class OPAFMetadata {
 
   static OPAFMetadata parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'metadata') {
-      print("Expected node with name 'metadata' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'metadata' and got '${node.name}'");
     }
 
     // Check metadata

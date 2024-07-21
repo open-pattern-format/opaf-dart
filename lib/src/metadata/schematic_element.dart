@@ -35,23 +35,19 @@ class SchematicElement {
 
   static parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'element') {
-      print("Expected node with name 'element' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'element' and got '${node.name}'");
     }
 
     if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from schematic element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'name' missing from schematic element");
     }
 
     if (node.getAttribute('description') == null) {
-      print("Attribute 'description' missing from schematic element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'description' missing from schematic element");
     }
 
     SchematicElement element = SchematicElement(

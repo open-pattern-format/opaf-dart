@@ -48,13 +48,11 @@ class PatternInstruction extends PatternElement {
 
   static PatternInstruction parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'instruction') {
-      print("Expected node with name 'opaf:instruction' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:instruction' and got '${node.name}'");
     }
   
     PatternInstruction instruction = PatternInstruction(null, []);
@@ -76,8 +74,7 @@ class PatternInstruction extends PatternElement {
       } else if (n.localName == "repeat") {
         instruction.elements.add(PatternRepeat.parse(n, instructionRepeat: true));
       } else {
-        print("Instruction does not support '${n.localName}' nodes");
-        throw OPAFParserException();
+        throw OPAFParserException("Instruction does not support '${n.localName}' nodes");
       }
     }
 

@@ -37,18 +37,15 @@ class Note {
 
   static Note parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'note') {
-      print("Expected node with name 'note' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'note' and got '${node.name}'");
     }
 
     if (node.getAttribute('text') == null) {
-      print("Attribute 'text' missing from 'note' element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'text' missing from 'note' element");
     }
 
     String text = node.getAttribute('text') as String;

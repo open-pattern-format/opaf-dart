@@ -36,18 +36,15 @@ class OPAFBlock {
 
   static OPAFBlock parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'define_block') {
-      print("Expected node with name 'opaf:define_block' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:define_block' and got '${node.name}'");
     }
   
     if (node.getAttribute('name') == null) {
-      print("Name attribute not found for block");
-      throw OPAFParserException();
+      throw OPAFParserException("Name attribute not found for block");
     }
   
     // Check node
@@ -88,14 +85,12 @@ class OPAFBlock {
       } else if (n.localName == "action") {
         block.elements.add(PatternAction.parse(n));
       } else {
-        print("Block does not support '${n.localName}' nodes");
-        throw OPAFParserException();
+        throw OPAFParserException("Block does not support '${n.localName}' nodes");
       }
     }
 
     if (block.elements.isEmpty) {
-      print("Block with name '${block.name}' is empty or contains no valid elements");
-      throw OPAFParserException();
+      throw OPAFParserException("Block with name '${block.name}' is empty or contains no valid elements");
     }
 
     return block;

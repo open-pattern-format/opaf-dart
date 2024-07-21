@@ -35,31 +35,26 @@ class DesignerLink {
 
   static DesignerLink parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'link') {
-      print("Expected node with name 'link' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'link' and got '${node.name}'");
     }
 
     if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from designer link");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'name' missing from designer link");
     }
   
     if (node.getAttribute('url') == null) {
-      print("Attribute 'url' missing from designer link");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'url' missing from designer link");
     }
 
     String name = node.getAttribute('name') as String;
     String url = node.getAttribute('url') as String;
 
     if (!isURL(url)) {
-      print("${url} is not a valid url");
-      throw OPAFParserException();
+      throw OPAFParserException("$url is not a valid url");
     }
 
     DesignerLink link = DesignerLink(name, url);

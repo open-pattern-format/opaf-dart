@@ -19,7 +19,6 @@ import 'package:opaf/src/pattern/action.dart';
 import 'package:xml/xml.dart';
 
 import '../opaf_exceptions.dart';
-import 'block.dart';
 import 'element.dart';
 import 'repeat.dart';
 
@@ -44,27 +43,38 @@ class ChartRow extends PatternElement {
     });
   }
 
+  ChartRow clone() {
+    ChartRow newRow = ChartRow(
+      type,
+      []
+    );
+
+    newRow.condition = condition;
+
+    for (var e in elements) {
+      newRow.elements.add(e.clone());
+    }
+
+    return newRow;
+  }
+
   static ChartRow parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'row') {
-      print("Expected node with name 'opaf:row' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:row' and got '${node.name}'");
     }
 
     if (node.getAttribute('type') == null) {
-      print("Attribute 'type' missing from row element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'type' missing from row element");
     }
 
     String type = node.getAttribute('type') as String;
 
     if (!['ws','rs','round'].any((t) => type == t)) {
-      print("Attribute 'type' must be one of 'rs, ws, round' for row element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'type' must be one of 'rs, ws, round' for row element");
     }
   
     ChartRow row = ChartRow(type, []);
@@ -77,13 +87,10 @@ class ChartRow extends PatternElement {
     for (var n in node.childElements) {
       if (n.localName == 'action') {
         row.elements.add(PatternAction.parse(n));
-      } else if (n.localName == "block") {
-        row.elements.add(PatternBlock.parse(n));
       } else if (n.localName == "repeat") {
         row.elements.add(PatternRepeat.parse(n, chartRepeat: true));
       } else {
-        print("Row does not support '${n.localName}' nodes");
-        throw OPAFParserException();
+        throw OPAFParserException("Row does not support '${n.localName}' nodes");
       }
     }
 

@@ -49,18 +49,15 @@ class OPAFParser {
     xmlDoc = XmlDocument.parse(File(filePath).readAsStringSync());
 
     if (xmlDoc.rootElement.name.local != 'pattern') {
-      print("'pattern' root node not found in OPAF file");
-      throw OPAFParserException();
+      throw OPAFParserException("'pattern' root node not found in OPAF file");
     }
 
     if (xmlDoc.rootElement.getAttribute('xmlns:opaf') == null) {
-      print('OPAF namespace is not declared in pattern attributes');
-      throw OPAFParserException();
+      throw OPAFParserException('OPAF namespace is not declared in pattern attributes');
     }
 
     if (xmlDoc.rootElement.getAttribute('name') == null) {
-      print("Pattern file is missing mandatory 'name' attribute");
-      throw OPAFParserException();
+      throw OPAFParserException("Pattern file is missing mandatory 'name' attribute");
     }
   
     return this;
@@ -213,8 +210,7 @@ class OPAFParser {
       String? path = OPAFUtils.parseUri(uri, dir ?? p.dirname(filePath));
 
       if (path == null) {
-        print("Failed to find included file with uri: $uri");
-        throw OPAFParserException();
+        throw OPAFParserException("Failed to find included file with uri: $uri");
       }
 
       // Recursively parse included files

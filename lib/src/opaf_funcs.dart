@@ -82,13 +82,11 @@ class OPAFFuncs {
 
   static dynamic choose(int index, dynamic values) {
     if (index < 1) {
-      print("Index must be 1 or greater for 'CHOOSE' function");
-      throw OPAFException();
+      throw OPAFException("Index must be 1 or greater for 'CHOOSE' function");
     }
 
     if (values.length < index) {
-      print("Index $index is out of range. Expected an index between 1 and ${values.length}");
-      throw OPAFException();
+      throw OPAFException("Index $index is out of range. Expected an index between 1 and ${values.length}");
     }
 
     return values[index - 1];
@@ -96,8 +94,7 @@ class OPAFFuncs {
 
   static dynamic loopChoose(int index, dynamic values) {
     if (index < 1) {
-      print("Index must be 1 or greater for 'CHOOSE' function");
-      throw OPAFException();
+      throw OPAFException("Index must be 1 or greater for 'CHOOSE' function");
     }
 
     // Loop index

@@ -43,18 +43,15 @@ class Size {
 
   static Size parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'size') {
-      print("Expected node with name 'size' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'size' and got '${node.name}'");
     }
 
     if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from size element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'name' missing from size element");
     }
 
     String name = node.getAttribute('name') as String;

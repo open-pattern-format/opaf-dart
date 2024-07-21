@@ -35,23 +35,19 @@ class Needle {
 
   static parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'needle') {
-      print("Expected node with name 'needle' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'needle' and got '${node.name}'");
     }
 
     if (node.getAttribute('type') == null) {
-      print("Attribute 'type' missing from 'needle' element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'type' missing from 'needle' element");
     }
 
     if (node.getAttribute('size') == null) {
-      print("Attribute 'size' missing from 'needle' element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'size' missing from 'needle' element");
     }
 
     Needle needle = Needle(

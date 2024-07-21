@@ -49,8 +49,7 @@ class OPAFColor {
 
   static String toHex(String value) {
     if (!isValid(value)) {
-      print("'$value' is not a valid hex rgb color string");
-      throw OPAFInvalidException();
+      throw OPAFInvalidException("'$value' is not a valid hex rgb color string");
     }
 
     if (hexColors.containsKey(value)) {
@@ -62,23 +61,19 @@ class OPAFColor {
 
   static OPAFColor parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (!node.name.local.contains('color')) {
-      print("Expected node with name 'opaf:define_color' or 'color' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:define_color' or 'color' and got '${node.name}'");
     }
   
     if (node.getAttribute('name') == null) {
-      print("Name attribute not found for color");
-      throw OPAFParserException();
+      throw OPAFParserException("Name attribute not found for color");
     }
 
     if (node.getAttribute('value') == null) {
-      print("Value for color not found");
-      throw OPAFParserException();
+      throw OPAFParserException("Value for color not found");
     }
 
     String name = node.getAttribute("name") as String;

@@ -66,8 +66,7 @@ class OPAFCompiler {
   XmlElement processConfig(OPAFConfig config) {
     if (customConfig.keys.contains(config.name)) {
       if (config.allowedValues.isNotEmpty && !config.allowedValues.contains(customConfig[config.name])) {
-        print("${customConfig[config.name]} is not a valid value for ${config.name}");
-        throw OPAFInvalidException();
+        throw OPAFInvalidException("${customConfig[config.name]} is not a valid value for ${config.name}");
       }
 
       globalValues[config.name] = OPAFUtils.strToNum(customConfig[config.name]);
@@ -127,8 +126,7 @@ class OPAFCompiler {
     OPAFAction? action = opafDoc.getOpafAction(a.name);
 
     if (action == null) {
-      print("Action with name ${a.name} could not be found.");
-      return [];
+      throw OPAFNotDefinedException("Action with name ${a.name} could not be found");
     }
 
     // Process parameters
@@ -144,8 +142,7 @@ class OPAFCompiler {
     // Check parameters
     for (var p in params.keys) {
       if (params[p] == "") {
-        print("Parameter '$p' is not defined for action '${action.name}'");
-        throw OPAFNotDefinedException();
+        throw OPAFNotDefinedException("Parameter '$p' is not defined for action '${action.name}'");
       }
     }
 
@@ -180,8 +177,7 @@ class OPAFCompiler {
 
   List<XmlElement> processImage(PatternImage image) {
     if (opafDoc.getOpafImageByName(image.name) == null) {
-      print("Unable to find image with name '${image.name}'");
-      return [];
+      throw OPAFNotDefinedException("Unable to find image with name '${image.name}'");
     }
 
     final builder = XmlBuilder();
@@ -273,8 +269,7 @@ class OPAFCompiler {
     OPAFBlock? block = opafDoc.getOpafBlock(element.name);
 
     if (block == null) {
-      print("Unable to find block with name '${element.name}'");
-      return [];
+      throw OPAFNotDefinedException("Unable to find block with name '${element.name}'");
     }
 
     Map<String, dynamic> params = Map.of(block.params);
@@ -290,8 +285,7 @@ class OPAFCompiler {
     // Check parameters
     for (var p in params.keys) {
       if (params[p] == "") {
-        print("Parameter '$p' is not defined for block '${block.name}'");
-        throw OPAFNotDefinedException();
+        throw OPAFNotDefinedException("Parameter '$p' is not defined for block '${block.name}'");
       }
     }
 
@@ -385,7 +379,7 @@ class OPAFCompiler {
 
   XmlDocument compile() {
     if (!customConfig.containsKey('name')) {
-      throw OPAFInvalidException();
+      throw OPAFInvalidException("'name' not provided in custom configuration");
     }
 
     final builder = XmlBuilder();
@@ -403,9 +397,11 @@ class OPAFCompiler {
             i.convert();
           }
 
-          if (i.data != null) {
-            builder.element("image", attributes: {"name": i.name, "data": base64Encode(i.data!)});
+          if (i.data == null) {
+            throw OPAFException("Image with name '${i.name} 'failed to convert");
           }
+
+          builder.element("image", attributes: {"name": i.name, "data": base64Encode(i.data!)});
         }
       }
 

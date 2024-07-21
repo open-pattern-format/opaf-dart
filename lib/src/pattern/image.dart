@@ -42,18 +42,15 @@ class PatternImage extends PatternElement {
 
   static PatternImage parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'image') {
-      print("Expected node with name 'opaf:image' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:image' and got '${node.name}'");
     }
 
     if (node.getAttribute('name') == null) {
-      print("Attribute 'name' missing from image element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'name' missing from image element");
     }
 
     PatternImage image = PatternImage(node.getAttribute('name') as String);

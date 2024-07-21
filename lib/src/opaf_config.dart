@@ -37,23 +37,19 @@ class OPAFConfig {
 
   static OPAFConfig parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'define_config') {
-      print("Expected node with name 'opaf:define_config' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:define_config' and got '${node.name}'");
     }
   
     if (node.getAttribute('name') == null) {
-      print("Name attribute not found for value");
-      throw OPAFParserException();
+      throw OPAFParserException("Name attribute not found for value");
     }
 
     if (node.getAttribute('value') == null) {
-      print("Value not defined");
-      throw OPAFParserException();
+      throw OPAFParserException("Value not defined");
     }
   
     String name = node.getAttribute("name") as String;

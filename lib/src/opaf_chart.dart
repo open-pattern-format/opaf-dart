@@ -36,18 +36,15 @@ class OPAFChart {
 
   static OPAFChart parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (!node.name.local.contains('chart')) {
-      print("Expected node with name 'opaf:define_chart' or 'chart' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:define_chart' or 'chart' and got '${node.name}'");
     }
   
     if (node.getAttribute('name') == null) {
-      print("Name attribute not found for chart");
-      throw OPAFParserException();
+      throw OPAFParserException("Name attribute not found for chart");
     }
   
     // Check node
@@ -64,8 +61,7 @@ class OPAFChart {
     }
 
     if (chart.rows.isEmpty) {
-      print("Chart with name ${chart.name} is empty or contains no valid rows");
-      throw OPAFParserException();
+      throw OPAFParserException("Chart with name ${chart.name} is empty or contains no valid rows");
     }
 
     return chart;

@@ -33,18 +33,15 @@ class PatternText extends PatternElement {
 
   static PatternText parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'text') {
-      print("Expected node with name 'opaf:text' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:text' and got '${node.name}'");
     }
 
     if (node.getAttribute('data') == null) {
-      print("Attribute 'data' missing from text element");
-      throw OPAFParserException();
+      throw OPAFParserException("Attribute 'data' missing from text element");
     }
 
     PatternText text = PatternText(node.getAttribute('data') as String);

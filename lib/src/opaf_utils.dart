@@ -112,8 +112,18 @@ static String? parseUri(String uri, String? dir) {
   }
 
   static bool evaluateCondition(String condition, Map<String, dynamic> values) {
-    String result = evaluateExpr(condition, values);
-    return toBoolean(result.toLowerCase());
+    if (condition.isEmpty) {
+      return true;
+    }
+
+    String strResult = evaluateExpr(condition, values);
+    bool? result = bool.tryParse(strResult.toLowerCase());
+
+    if (result == null) {
+      throw OPAFInvalidConditionException("Condition did not evaluate to 'true' or 'false' as expected");
+    }
+
+    return result;
   }
 
   static bool evaluateNodeCondition(String? condition, Map<String, dynamic> values) {
@@ -130,8 +140,7 @@ static String? parseUri(String uri, String? dir) {
       var colors = doc.getOpafColors();
 
       if (!colors.containsKey(params['color'])) {
-        print("Color '$params['color]' is not defined");
-        throw OPAFNotDefinedException();
+        throw OPAFNotDefinedException("Color '$params['color]' is not defined");
       }
     }
   }
@@ -167,20 +176,17 @@ static String? parseUri(String uri, String? dir) {
 
       if (child.name.prefix != null) {
         if (child.name.prefix != "opaf") {
-          print("Node with name '${child.name}' is not recognized");
-          throw OPAFInvalidException();
+          throw OPAFInvalidException("Node with name '${child.name}' is not recognized");
         }
       }
 
       if (!supportedNodes.contains(child.name.local)) {
-        print("Node with name '${child.name.local}' not recognized");
-        throw OPAFInvalidException();
+        throw OPAFInvalidException("Node with name '${child.name.local}' not recognized");
       }
 
       if (allowedNodes.isNotEmpty) {
         if (!allowedNodes.contains(child.name.local)) {
-          print("Node with name '${child.name.local}' is not allowed in this scope");
-          throw OPAFInvalidException();
+          throw OPAFInvalidException("Node with name '${child.name.local}' is not allowed in this scope");
         }
       }
 

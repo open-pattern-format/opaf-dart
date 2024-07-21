@@ -39,18 +39,15 @@ class OPAFComponent {
 
   static OPAFComponent parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'component') {
-      print("Expected node with name 'opaf:component' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:component' and got '${node.name}'");
     }
   
     if (node.getAttribute('name') == null) {
-      print("Name attribute not found for component");
-      throw OPAFParserException();
+      throw OPAFParserException("Name attribute not found for component");
     }
   
     // Check node
@@ -76,14 +73,12 @@ class OPAFComponent {
       } else if (n.localName == "image") {
         component.elements.add(PatternImage.parse(n));
       } else {
-        print("Component does not support '${n.localName}' nodes");
-        throw OPAFParserException();
+        throw OPAFParserException("Component does not support '${n.localName}' nodes");
       }
     }
 
     if (component.elements.isEmpty) {
-      print("Component with name '$component.name' is empty or contains no valid elements");
-      throw OPAFParserException();
+      throw OPAFParserException("Component with name '$component.name' is empty or contains no valid elements");
     }
 
     return component;

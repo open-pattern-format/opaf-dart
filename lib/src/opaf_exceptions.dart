@@ -16,21 +16,41 @@
  */
 
 class OPAFException implements Exception {
-  const OPAFException() : super();
+  String error;
+  OPAFException(this.error) : super();
 }
 
 class OPAFInvalidException implements OPAFException {
-  const OPAFInvalidException() : super();
+  @override
+  String error;
+
+  OPAFInvalidException(this.error) : super();
 }
 
 class OPAFParserException implements OPAFException {
-  const OPAFParserException() : super();
+  @override
+  String error;
+
+  OPAFParserException(this.error) : super();
 }
 
 class OPAFNotPackagedException implements OPAFException {
-  const OPAFNotPackagedException() : super();
+  @override
+  String error;
+
+  OPAFNotPackagedException(this.error) : super();
 }
 
 class OPAFNotDefinedException implements OPAFException {
-  const OPAFNotDefinedException() : super();
+  @override
+  String error;
+
+  OPAFNotDefinedException(this.error) : super();
+}
+
+class OPAFInvalidConditionException implements OPAFException {
+  @override
+  String error;
+
+  OPAFInvalidConditionException(this.error) : super();
 }

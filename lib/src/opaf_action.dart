@@ -32,18 +32,15 @@ class OPAFAction {
 
   static OPAFAction parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'define_action') {
-      print("Expected node with name 'opaf:define_action' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:define_action' and got '${node.name}'");
     }
   
     if (node.getAttribute('name') == null) {
-      print("Name attribute not found for action");
-      throw OPAFParserException();
+      throw OPAFParserException("Name attribute not found for action");
     }
 
     OPAFAction action = OPAFAction(
@@ -75,8 +72,7 @@ class OPAFAction {
     }
 
     if (action.elements.isEmpty) {
-      print("No actions found for action '${action.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("No actions found for action '${action.name}'");
     }
 
     if (node.getAttribute('custom') != null) {

@@ -43,18 +43,15 @@ class PatternBlock extends PatternElement {
 
   static PatternBlock parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (node.name.local != 'block') {
-      print("Expected node with name 'opaf:block' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:block' and got '${node.name}'");
     }
   
     if (node.getAttribute('name') == null) {
-      print("Name attribute not found for block");
-      throw OPAFParserException();
+      throw OPAFParserException("Name attribute not found for block");
     }
 
     PatternBlock block = PatternBlock(

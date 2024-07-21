@@ -39,16 +39,14 @@ class OPAFImage {
 
   convert() {
     if (path == null) {
-      print("Image path not found.");
-      throw OPAFParserException();
+      throw OPAFParserException("Image path not found");
     }
 
     // Decode image
     Image? image = decodeImage(File(path!).readAsBytesSync());
 
     if (image == null) {
-      print("Failed to decode image at path '$path'");
-      throw OPAFParserException();
+      throw OPAFParserException("Failed to decode image at path '$path'");
     }
 
     // Resize
@@ -72,18 +70,15 @@ class OPAFImage {
     int? size;
 
     if (node.nodeType != XmlNodeType.ELEMENT) {
-      print("Unexpected node type");
-      throw OPAFParserException();
+      throw OPAFParserException("Unexpected node type");
     }
   
     if (!node.name.local.contains('image')) {
-      print("Expected node with name 'opaf:define_image' or 'image' and got '${node.name}'");
-      throw OPAFParserException();
+      throw OPAFParserException("Expected node with name 'opaf:define_image' or 'image' and got '${node.name}'");
     }
   
     if (node.getAttribute('name') == null) {
-      print("Name attribute not found for image");
-      throw OPAFParserException();
+      throw OPAFParserException("Name attribute not found for image");
     }
 
     // URI
@@ -92,8 +87,7 @@ class OPAFImage {
       path = OPAFUtils.parseUri(uri, dir);
 
       if (path == null) {
-        print("Image not found with uri: $uri");
-        throw OPAFParserException();
+        throw OPAFParserException("Image not found with uri: $uri");
       }
     }
 
