@@ -120,7 +120,7 @@ static String? parseUri(String uri, String? dir) {
     bool? result = bool.tryParse(strResult.toLowerCase());
 
     if (result == null) {
-      throw OPAFInvalidConditionException("Condition did not evaluate to 'true' or 'false' as expected");
+      throw OPAFInvalidConditionException("Condition '$condition' did not evaluate to 'true' or 'false' as expected");
     }
 
     return result;
