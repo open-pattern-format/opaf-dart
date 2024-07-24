@@ -40,6 +40,17 @@ class PatternImage extends PatternElement {
     });
   }
 
+  PatternImage clone() {
+    PatternImage newImage = PatternImage(
+      name,
+    );
+
+    newImage.caption = caption;
+    newImage.condition = condition;
+
+    return newImage;
+  }
+
   static PatternImage parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       throw OPAFParserException("Unexpected node type");
