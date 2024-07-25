@@ -41,6 +41,17 @@ class PatternBlock extends PatternElement {
     });
   }
 
+  PatternBlock clone() {
+    PatternBlock newBlock = PatternBlock(
+      name,
+      Map.from(params)
+    );
+
+    newBlock.condition = condition;
+
+    return newBlock;
+  }
+
   static PatternBlock parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       throw OPAFParserException("Unexpected node type");

@@ -46,6 +46,21 @@ class PatternInstruction extends PatternElement {
     });
   }
 
+  PatternInstruction clone() {
+    PatternInstruction newInstruction = PatternInstruction(
+      name,
+      []
+    );
+
+    newInstruction.condition = condition;
+
+    for (var e in elements) {
+      newInstruction.elements.add(e.clone());
+    }
+
+    return newInstruction;
+  }
+
   static PatternInstruction parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       throw OPAFParserException("Unexpected node type");

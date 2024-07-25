@@ -31,6 +31,16 @@ class PatternText extends PatternElement {
     });
   }
 
+  PatternText clone() {
+    PatternText newText = PatternText(
+      data,
+    );
+
+    newText.condition = condition;
+
+    return newText;
+  }
+
   static PatternText parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       throw OPAFParserException("Unexpected node type");
