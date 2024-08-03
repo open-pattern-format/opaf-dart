@@ -63,7 +63,7 @@ class OPAFPattern {
     String uniqueId = node.getAttribute("unique_id") as String;
     Version version = Version.parse(node.getAttribute('version') as String);
     
-    var pattern = OPAFPattern(name, uniqueId, version);
+    var pattern = OPAFPattern(uniqueId, name, version);
 
     for (var c in node.childElements) {
       if (c.localName == 'metadata') {
