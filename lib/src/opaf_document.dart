@@ -204,7 +204,11 @@ class OPAFDocument {
     return builder.buildDocument();
   }
 
-  void saveToFile() {
+  void saveToFile({backup = true}) {
+    if (backup) {
+      file.copySync('${file.path}.bak');
+    }
+
     file.writeAsString(toXml().toString());
   }
 
