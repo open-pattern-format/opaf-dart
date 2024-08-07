@@ -28,7 +28,7 @@ import 'opaf_pattern.dart';
 import 'opaf_utils.dart';
 
 class OPAFProject {
-  File file;
+  File? file;
   XmlDocument xmlDoc;
   String name;
   String uniqueId;
@@ -169,13 +169,17 @@ class OPAFProject {
   }
 
   void saveToFile() {
-    file.writeAsString(xmlDoc.toString());
+    file?.writeAsString(xmlDoc.toString());
   }
 
   static Future<OPAFProject> parse(String path) async {
     File file = File(path);
     var doc = XmlDocument.parse(await file.readAsString());
 
+    return parseDoc(doc, file: file);
+  }
+
+  static Future<OPAFProject> parseDoc(XmlDocument doc, {File? file}) async {
     var node = doc.rootElement;
 
     if (node.nodeType != XmlNodeType.ELEMENT) {
