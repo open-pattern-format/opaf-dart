@@ -108,6 +108,10 @@ class OPAFFuncs {
   }
 
   static bool isEmpty(dynamic val) {
+    if (val == null) {
+      return true;
+    }
+
     return val.toString().isEmpty;
   }
 
