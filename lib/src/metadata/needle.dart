@@ -27,7 +27,7 @@ class Needle {
   Needle(this.type, this.size);
 
   void toXml(XmlBuilder builder) {
-    builder.element("notion", nest:() {
+    builder.element("needle", nest:() {
       builder.attribute("type", type);
       builder.attribute("size", size);
     });
