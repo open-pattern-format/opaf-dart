@@ -33,7 +33,7 @@ class MetadataUtils {
       'image',
       'link',
       'measurement',
-      'needles',
+      'needle',
       'note',
       'notion',
       'published',
