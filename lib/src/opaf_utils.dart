@@ -364,4 +364,18 @@ static String? parseUri(String uri, String? dir) {
 
     return null;
   }
+
+  static String? isNullOrEmpty(var val) {
+    if (val == null) {
+      return null;
+    }
+
+    String test = val.toString();
+
+    if (test.isEmpty) {
+      return null;
+    }
+
+    return test;
+  }
 }
