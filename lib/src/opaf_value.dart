@@ -35,6 +35,18 @@ class OPAFValue {
     this.condition
   );
 
+  OPAFValue clone() {
+    OPAFValue newValue= OPAFValue(
+      uniqueId,
+      name,
+      value,
+      condition
+    );
+
+
+    return newValue;
+  }
+
   static OPAFValue parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       throw OPAFParserException("Unexpected node type");
