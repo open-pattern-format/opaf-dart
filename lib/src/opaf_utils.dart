@@ -96,6 +96,7 @@ static String? parseUri(String uri, String? dir) {
           "CHOOSE": OPAFFuncs.choose,
           "LCHOOSE": OPAFFuncs.loopChoose,
           "ISEMPTY": OPAFFuncs.isEmpty,
+          "MULTIPLE": OPAFFuncs.multiple,
         };
         
         for (String s in values.keys) {
