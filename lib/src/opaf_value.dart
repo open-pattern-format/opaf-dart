@@ -37,7 +37,7 @@ class OPAFValue {
 
   OPAFValue clone() {
     OPAFValue newValue= OPAFValue(
-      uniqueId,
+      Uuid().v4(),
       name,
       value,
       condition
