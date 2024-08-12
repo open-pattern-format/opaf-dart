@@ -77,10 +77,6 @@ class OPAFComponent {
       }
     }
 
-    if (component.elements.isEmpty) {
-      throw OPAFParserException("Component with name '$component.name' is empty or contains no valid elements");
-    }
-
     return component;
   }
 }
