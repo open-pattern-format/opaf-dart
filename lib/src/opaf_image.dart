@@ -53,7 +53,11 @@ class OPAFImage {
     int scale = size ?? OPAFImage.defaultSize;
 
     if (image.height > scale || image.width > scale) {
-      image = copyResize(image, width: scale, height: scale, maintainAspect: true);
+      if (image.height >= image.width) {
+        image = copyResize(image, height: scale, maintainAspect: true);
+      } else {
+        image = copyResize(image, width: scale, maintainAspect: true);
+      }
     }
 
     if (image.hasAlpha) {
