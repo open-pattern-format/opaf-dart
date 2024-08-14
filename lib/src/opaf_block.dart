@@ -61,12 +61,16 @@ class OPAFBlock {
       String paramsAttr = node.getAttribute('params') as String;
 
       for (var param in paramsAttr.split(" ")) {
-          if (param.contains('=')) {
-              var paramList = param.split('=');
-              block.params[paramList[0]] = OPAFUtils.strToNum(paramList[1]);
-          } else {
-              block.params[param] = '';
-          }
+        if (param.isEmpty) {
+          continue;
+        }
+
+        if (param.contains('=')) {
+            var paramList = param.split('=');
+            block.params[paramList[0]] = OPAFUtils.strToNum(paramList[1]);
+        } else {
+            block.params[param] = '';
+        }
       }
     }
     
