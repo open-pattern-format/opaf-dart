@@ -92,21 +92,6 @@ class OPAFFuncs {
     return values[index - 1];
   }
 
-  static dynamic loopChoose(int index, dynamic values) {
-    if (index < 1) {
-      throw OPAFException("Index must be 1 or greater for 'CHOOSE' function");
-    }
-
-    // Loop index
-    index = (index % values.length).round();
-
-    if (index == 0) {
-      index = values.length;
-    }
-
-    return values[index - 1];
-  }
-
   static bool isEmpty(dynamic val) {
     if (val == null) {
       return true;

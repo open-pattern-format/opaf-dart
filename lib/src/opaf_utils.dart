@@ -94,7 +94,6 @@ static String? parseUri(String uri, String? dir) {
           "NOT": OPAFFuncs.not,
           "ABS": OPAFFuncs.abs,
           "CHOOSE": OPAFFuncs.choose,
-          "LCHOOSE": OPAFFuncs.loopChoose,
           "ISEMPTY": OPAFFuncs.isEmpty,
           "MULTIPLE": OPAFFuncs.multiple,
         };
