@@ -28,6 +28,10 @@ class PatternText extends PatternElement {
   void toXml(XmlBuilder builder) {
     builder.element("opaf:text", nest:() {
       builder.attribute("data", data);
+
+      if (condition != null) {
+        builder.attribute("condition", condition);
+      }
     });
   }
 
