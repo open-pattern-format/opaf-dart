@@ -60,6 +60,11 @@ class OPAFCompiler {
       );
     }
 
+    // Check value if required
+    if (config.required && globalValues[config.name].toString().trim().isEmpty) {
+      throw OPAFInvalidException("${config.name} is required but no value was given");
+    }
+
     XmlElement element = XmlElement(XmlName("config"));
     element.setAttribute('name', config.name);
     element.setAttribute('value', globalValues[config.name].toString());

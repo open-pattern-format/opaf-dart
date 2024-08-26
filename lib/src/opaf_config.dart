@@ -47,13 +47,9 @@ class OPAFConfig {
     if (node.getAttribute('name') == null) {
       throw OPAFParserException("Name attribute not found for value");
     }
-
-    if (node.getAttribute('value') == null) {
-      throw OPAFParserException("Value not defined");
-    }
   
     String name = node.getAttribute("name") as String;
-    String value = node.getAttribute("value") as String;
+    String value = node.getAttribute("value") ?? '';
   
     // Required
     bool required = false;
