@@ -23,18 +23,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:xml/xml.dart';
 import 'package:version/version.dart';
 
-import 'opaf_action.dart';
-import 'opaf_block.dart';
-import 'opaf_chart.dart';
-import 'opaf_color.dart';
-import 'opaf_component.dart';
-import 'opaf_config.dart';
-import 'opaf_image.dart';
-import 'opaf_metadata.dart';
-import 'opaf_utils.dart';
-import 'opaf_value.dart';
-
-final Version supportedVersion = Version.parse("0.1");
+import '../opaf.dart';
 
 class OPAFDocument {
   File file;
@@ -76,7 +65,7 @@ class OPAFDocument {
         final pubspec = Pubspec.parse(pubspecFile);
 
         builder.attribute('pkg_version', 'dart_${pubspec.version}');
-        builder.attribute('spec_version', supportedVersion.toString());
+        builder.attribute('spec_version', supportedSpec);
       }
 
       // Metadata

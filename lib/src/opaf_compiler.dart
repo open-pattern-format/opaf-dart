@@ -17,26 +17,10 @@
 
 import 'dart:convert';
 
-import 'package:opaf/src/opaf_chart.dart';
-import 'package:opaf/src/opaf_config.dart';
-import 'package:opaf/src/opaf_value.dart';
 import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
-import 'opaf_action.dart';
-import 'opaf_block.dart';
-import 'opaf_color.dart';
-import 'opaf_component.dart';
-import 'opaf_document.dart';
-import 'opaf_exceptions.dart';
-import 'opaf_utils.dart';
-import 'pattern/action.dart';
-import 'pattern/block.dart';
-import 'pattern/image.dart';
-import 'pattern/instruction.dart';
-import 'pattern/repeat.dart';
-import 'pattern/row.dart';
-import 'pattern/text.dart';
+import '../opaf.dart';
 
 
 class OPAFCompiler {
@@ -389,6 +373,7 @@ class OPAFCompiler {
     builder.element("project", nest: () {
       builder.attribute("name", customConfig['name']);
       builder.attribute("unique_id", Uuid().v4());
+      builder.attribute("spec_version", supportedSpec);
 
       // Images
       if (opafDoc.opafImages.isNotEmpty) {

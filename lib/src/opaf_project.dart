@@ -17,21 +17,18 @@
 
 import 'dart:io';
 
+import 'package:opaf/opaf.dart';
 import 'package:string_validator/string_validator.dart';
+import 'package:version/version.dart';
 import 'package:xml/xml.dart';
 
-import 'opaf_chart.dart';
-import 'opaf_color.dart';
-import 'opaf_exceptions.dart';
-import 'opaf_image.dart';
-import 'opaf_pattern.dart';
-import 'opaf_utils.dart';
 
 class OPAFProject {
   File? file;
   XmlDocument xmlDoc;
   String name;
   String uniqueId;
+  Version specVersion;
   int progress = 0;
   OPAFPattern? pattern;
   Map<String, String> config = {};
@@ -44,6 +41,7 @@ class OPAFProject {
     this.xmlDoc,
     this.name, 
     this.uniqueId,
+    this.specVersion,
     this.progress,
   );
 
@@ -201,9 +199,12 @@ class OPAFProject {
     String name = node.getAttribute("name") as String;
     String uniqueId = node.getAttribute("unique_id") as String;
 
+    // Spec Version
+    Version? specVersion = Version.parse(node.getAttribute("spec_version") ?? supportedSpec.toString());
+
     // Progress
     int? progress = int.tryParse(node.getAttribute("progress") ?? '0');
     
-    return OPAFProject(file, doc, name, uniqueId, progress ?? 0);
+    return OPAFProject(file, doc, name, uniqueId, specVersion, progress ?? 0);
   }
 }

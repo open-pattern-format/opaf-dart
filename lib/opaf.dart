@@ -17,6 +17,7 @@
 
 library opaf;
 
+
 export 'src/opaf_action.dart' show OPAFAction;
 export 'src/opaf_block.dart' show OPAFBlock;
 export 'src/opaf_chart.dart' show OPAFChart;
@@ -50,3 +51,4 @@ export 'src/pattern/row.dart' show ChartRow;
 export 'src/pattern/text.dart' show PatternText;
 
 
+final String supportedSpec = "0.1";
