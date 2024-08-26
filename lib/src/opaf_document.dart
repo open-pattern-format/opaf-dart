@@ -19,6 +19,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart';
+import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:xml/xml.dart';
 import 'package:version/version.dart';
 
@@ -33,15 +34,16 @@ import 'opaf_metadata.dart';
 import 'opaf_utils.dart';
 import 'opaf_value.dart';
 
-final Version specVersion = Version.parse("0.1.0");
+final Version supportedVersion = Version.parse("0.1");
 
 class OPAFDocument {
   File file;
   String uniqueId = "";
   String name = "";
-  Version version = Version.parse('1.0.0');
-  String opafNamespace = 'https://github.com/open-pattern-format/opaf/wiki';
-  Version? pkgVersion;
+  Version version = Version.parse('1.0');
+  String opafNamespace = 'https://github.com/open-pattern-format/opaf';
+  Version? specVersion;
+  String? pkgVersion;
   List<OPAFConfig> opafConfigs = [];
   List<OPAFValue> opafValues = [];
   List<OPAFColor> opafColors = [];
@@ -70,7 +72,11 @@ class OPAFDocument {
       }
 
       if (package) {
-        builder.attribute('pkg_version', specVersion.toString());
+        final pubspecFile = File('pubspec.yaml').readAsStringSync();
+        final pubspec = Pubspec.parse(pubspecFile);
+
+        builder.attribute('pkg_version', 'dart_${pubspec.version}');
+        builder.attribute('spec_version', supportedVersion.toString());
       }
 
       // Metadata

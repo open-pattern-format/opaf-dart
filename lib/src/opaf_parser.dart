@@ -74,8 +74,12 @@ class OPAFParser {
       opafDoc.version = Version.parse(xmlDoc.rootElement.getAttribute('version') as String);
     }
 
+    if (xmlDoc.rootElement.getAttribute('spec_version') != null) {
+      opafDoc.specVersion = Version.parse(xmlDoc.rootElement.getAttribute('spec_version') as String);
+    }
+
     if (xmlDoc.rootElement.getAttribute('pkg_version') != null) {
-      opafDoc.pkgVersion = Version.parse(xmlDoc.rootElement.getAttribute('pkg_version') as String);
+      opafDoc.pkgVersion = xmlDoc.rootElement.getAttribute('pkg_version') as String;
     }
 
     if (xmlDoc.rootElement.getAttribute('unique_id') != null) {
