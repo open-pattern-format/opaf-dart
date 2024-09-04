@@ -30,6 +30,22 @@ class OPAFAction {
 
   OPAFAction(this.name, this.params, this.elements);
 
+  OPAFAction clone() {
+    OPAFAction newAction = OPAFAction(
+      name,
+      Map.from(params),
+      [],
+    );
+
+    for (PatternAction a in elements) {
+      newAction.elements.add(a.clone());
+    }
+
+    newAction.custom = custom;
+
+    return newAction;
+  }
+
   static OPAFAction parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       throw OPAFParserException("Unexpected node type");
@@ -72,7 +88,7 @@ class OPAFAction {
     }
 
     if (action.elements.isEmpty) {
-      throw OPAFParserException("No actions found for action '${action.name}'");
+      throw OPAFParserException("No action definitions found for action '${action.name}'");
     }
 
     if (node.getAttribute('custom') != null) {
