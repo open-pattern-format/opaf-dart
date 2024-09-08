@@ -167,7 +167,7 @@ class OPAFProject {
   }
 
   void saveToFile() {
-    file?.writeAsString(xmlDoc.toString());
+    file?.writeAsStringSync(xmlDoc.toString());
   }
 
   static Future<OPAFProject> parse(String path) async {

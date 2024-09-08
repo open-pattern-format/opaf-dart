@@ -204,13 +204,13 @@ class OPAFDocument {
       file.copySync('${file.path}.bak');
     }
 
-    file.writeAsString(toXml().toString());
+    file.writeAsStringSync(toXml().toString());
   }
 
   void package() {
     String path = '${withoutExtension(file.path)}_${version}.opafpkg';
     File package_file = File(path);
-    package_file.writeAsString(toXml(package: true).toString());
+    package_file.writeAsStringSync(toXml(package: true).toString());
   }
 
   void addOpafColor(OPAFColor color) {
