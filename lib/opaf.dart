@@ -51,4 +51,4 @@ export 'src/pattern/row.dart' show ChartRow;
 export 'src/pattern/text.dart' show PatternText;
 
 
-final String supportedSpec = "0.1";
+final String supportedSpec = "1.0";
