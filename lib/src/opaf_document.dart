@@ -19,7 +19,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart';
-import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:xml/xml.dart';
 import 'package:version/version.dart';
 
@@ -61,10 +60,8 @@ class OPAFDocument {
       }
 
       if (package) {
-        final pubspecFile = File('pubspec.yaml').readAsStringSync();
-        final pubspec = Pubspec.parse(pubspecFile);
 
-        builder.attribute('pkg_version', 'dart_${pubspec.version}');
+        builder.attribute('pkg_version', 'dart_$libVersion');
         builder.attribute('spec_version', supportedSpec);
       }
 
