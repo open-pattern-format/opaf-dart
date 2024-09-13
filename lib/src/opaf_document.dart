@@ -60,7 +60,6 @@ class OPAFDocument {
       }
 
       if (package) {
-
         builder.attribute('pkg_version', 'dart_$libVersion');
         builder.attribute('spec_version', supportedSpec);
       }
