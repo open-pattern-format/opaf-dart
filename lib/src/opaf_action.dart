@@ -87,10 +87,6 @@ class OPAFAction {
       }
     }
 
-    if (action.elements.isEmpty) {
-      throw OPAFParserException("No action definitions found for action '${action.name}'");
-    }
-
     if (node.getAttribute('custom') != null) {
       action.custom = bool.parse(node.getAttribute('custom') as String, caseSensitive: false);
     }

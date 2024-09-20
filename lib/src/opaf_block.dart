@@ -93,10 +93,6 @@ class OPAFBlock {
       }
     }
 
-    if (block.elements.isEmpty) {
-      throw OPAFParserException("Block with name '${block.name}' is empty or contains no valid elements");
-    }
-
     return block;
   }
 }

@@ -60,10 +60,6 @@ class OPAFChart {
       chart.rows.add(ChartRow.parse(e));
     }
 
-    if (chart.rows.isEmpty) {
-      throw OPAFParserException("Chart with name ${chart.name} is empty or contains no valid rows");
-    }
-
     return chart;
   }
 }
