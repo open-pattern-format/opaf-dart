@@ -25,6 +25,7 @@ class OPAFConfig {
   String value;
   bool required;
   List<String> allowedValues;
+  String? title;
   String? description;
 
   OPAFConfig(
@@ -32,6 +33,7 @@ class OPAFConfig {
     this.value,
     this.required,
     this.allowedValues,
+    this.title,
     this.description,
   );
 
@@ -64,9 +66,12 @@ class OPAFConfig {
         allowedValues.map((v) => v.trim());
     }
 
+    // Title
+    String? title = node.getAttribute("title");
+
     // Description
     String? description = node.getAttribute("description");
     
-    return OPAFConfig(name, value, required, allowedValues, description);
+    return OPAFConfig(name, value, required, allowedValues, title, description);
   }
 }

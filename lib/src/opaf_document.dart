@@ -105,7 +105,11 @@ class OPAFDocument {
             builder.attribute('allowed_values', c.allowedValues.join(','));
           }
 
-          if (c.description != null) {
+          if (OPAFUtils.isNullOrEmpty(c.title) != null) {
+            builder.attribute('title', c.title);
+          }
+
+          if (OPAFUtils.isNullOrEmpty(c.description) != null) {
             builder.attribute('description', c.description);
           }
         });
