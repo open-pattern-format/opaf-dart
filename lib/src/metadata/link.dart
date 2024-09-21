@@ -20,11 +20,11 @@ import 'package:xml/xml.dart';
 
 import '../opaf_exceptions.dart';
 
-class DesignerLink {
+class Link {
   String name;
   String url;
 
-  DesignerLink(this.name, this.url);
+  Link(this.name, this.url);
 
   void toXml(XmlBuilder builder) {
     builder.element("link", nest:() {
@@ -33,7 +33,7 @@ class DesignerLink {
     });
   }
 
-  static DesignerLink parse(XmlElement node) {
+  static Link parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       throw OPAFParserException("Unexpected node type");
     }
@@ -57,7 +57,7 @@ class DesignerLink {
       throw OPAFParserException("$url is not a valid url");
     }
 
-    DesignerLink link = DesignerLink(name, url);
+    Link link = Link(name, url);
 
     return link;
   }

@@ -18,6 +18,7 @@
 import 'package:opaf/src/metadata/needle.dart';
 import 'package:xml/xml.dart';
 
+import 'metadata/link.dart';
 import 'opaf_exceptions.dart';
 
 import 'metadata/designer.dart';
@@ -38,6 +39,7 @@ class OPAFMetadata {
   String? published;
   List<String> tags = [];
   List<MetadataImage> images = [];
+  List<Link> links = [];
   List<Notion> notions = [];
   List<Needle> needles = [];
   List<Designer> designers = [];
@@ -79,6 +81,10 @@ class OPAFMetadata {
       builder.element("tag", nest:() {
         builder.text(t);
       });
+    }
+
+    for (var l in links) {
+      l.toXml(builder);
     }
 
     for (var n in notions) {
@@ -160,6 +166,11 @@ class OPAFMetadata {
       // Image
       if (e.localName == 'image') {
         metadata.images.add(MetadataImage.parse(e));
+      }
+
+      // Link
+      if (e.localName == 'link') {
+        metadata.links.add(Link.parse(e));
       }
 
       // Tag

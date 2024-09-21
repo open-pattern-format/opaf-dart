@@ -18,10 +18,10 @@
 library opaf.metadata;
 
 
-export 'src/metadata/designer_link.dart' show DesignerLink;
 export 'src/metadata/designer.dart' show Designer;
 export 'src/metadata/gauge.dart' show Gauge;
 export 'src/metadata/image.dart' show MetadataImage;
+export 'src/metadata/link.dart' show Link;
 export 'src/metadata/measurement.dart' show Measurement;
 export 'src/metadata/needle.dart' show Needle;
 export 'src/metadata/note.dart' show Note;

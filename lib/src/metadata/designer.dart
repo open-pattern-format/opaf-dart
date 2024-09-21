@@ -19,7 +19,7 @@ import 'package:string_validator/string_validator.dart';
 import 'package:xml/xml.dart';
 
 import '../opaf_exceptions.dart';
-import 'designer_link.dart';
+import 'link.dart';
 import 'image.dart';
 
 class Designer {
@@ -27,7 +27,7 @@ class Designer {
   String? email;
   String? about;
   List<MetadataImage> images = [];
-  List<DesignerLink> links = [];
+  List<Link> links = [];
 
   Designer(this.name);
 
@@ -86,7 +86,7 @@ class Designer {
       }
 
       if (e.name.local == 'link') {
-        designer.links.add(DesignerLink.parse(e));
+        designer.links.add(Link.parse(e));
       }
     }
 
