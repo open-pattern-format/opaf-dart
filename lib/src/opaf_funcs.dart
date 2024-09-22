@@ -53,8 +53,21 @@ class OPAFFuncs {
   }
 
   static bool equals(dynamic val, dynamic values) {
+    // Do string comparisons in lower case
+    if (val is String) {
+      val = val.toLowerCase();
+    }
+
+    if (values is String) {
+      values = values.toLowerCase();
+    }
+
     if (values is List) {
       for (var v in values) {
+        if (v is String) {
+          v = v.toLowerCase();
+        }
+        
         if (val == v) {
           return true;
         }
