@@ -67,7 +67,7 @@ class OPAFFuncs {
         if (v is String) {
           v = v.toLowerCase();
         }
-        
+
         if (val == v) {
           return true;
         }
@@ -131,5 +131,17 @@ class OPAFFuncs {
 
   static num max(num val1, num val2) {
     return m.max(val1, val2);
+  }
+
+  static bool toBool(dynamic val) {
+    if (val is bool) {
+      return val;
+    }
+
+    if (val is String) {
+      return ['true', 'yes', '1'].contains(val.trim().toLowerCase());
+    }
+
+    return val == 1;
   }
 }
