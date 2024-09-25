@@ -99,6 +99,7 @@ static String? parseUri(String uri, String? dir) {
           "MIN": OPAFFuncs.min,
           "MAX": OPAFFuncs.max,
           "BOOL": OPAFFuncs.toBool,
+          "IF": OPAFFuncs.ifElse,
         };
         
         for (String s in values.keys) {

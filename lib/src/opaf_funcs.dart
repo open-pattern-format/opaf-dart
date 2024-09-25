@@ -144,4 +144,12 @@ class OPAFFuncs {
 
     return val == 1;
   }
+
+  static dynamic ifElse(bool test, dynamic valT, dynamic valF) {
+    if (test) {
+      return valT;
+    }
+
+    return valF;
+  }
 }
