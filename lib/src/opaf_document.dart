@@ -25,7 +25,7 @@ import 'package:version/version.dart';
 import '../opaf.dart';
 
 class OPAFDocument {
-  File file;
+  File? file;
   String uniqueId = "";
   String name = "";
   Version version = Version.parse('1.0');
@@ -42,7 +42,7 @@ class OPAFDocument {
   List<OPAFComponent> opafComponents = [];
   OPAFMetadata metadata = OPAFMetadata();
   
-  OPAFDocument(this.file);
+  OPAFDocument();
 
   XmlDocument toXml ({bool package=false}) {
     final builder = XmlBuilder();
@@ -200,15 +200,23 @@ class OPAFDocument {
   }
 
   void saveToFile({backup = true}) {
-    if (backup) {
-      file.copySync('${file.path}.bak');
+    if (file == null) {
+      return;
     }
 
-    file.writeAsStringSync(toXml().toString());
+    if (backup) {
+      file?.copySync('${file?.path}.bak');
+    }
+
+    file?.writeAsStringSync(toXml().toString());
   }
 
   void package() {
-    String path = '${withoutExtension(file.path)}_${version}.opafpkg';
+    if (file == null) {
+      return;
+    }
+
+    String path = '${withoutExtension(file!.path)}_${version}.opafpkg';
     File package_file = File(path);
     package_file.writeAsStringSync(toXml(package: true).toString());
   }

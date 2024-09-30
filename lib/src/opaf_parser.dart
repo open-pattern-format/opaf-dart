@@ -35,18 +35,21 @@ import 'opaf_utils.dart';
 import 'opaf_value.dart';
 
 class OPAFParser {
-  late String filePath;
+  String? filePath;
   late XmlDocument xmlDoc;
   late OPAFDocument opafDoc;
 
   OPAFParser.update(this.xmlDoc, this.opafDoc);
+  OPAFParser.fromFile(this.filePath, this.opafDoc);
+  OPAFParser.fromXml(this.xmlDoc, this.opafDoc);
 
-  OPAFParser(this.filePath) {
-    opafDoc = OPAFDocument(File(filePath));
-  }
+  OPAFParser();
 
   OPAFParser initialize() {
-    xmlDoc = XmlDocument.parse(File(filePath).readAsStringSync());
+    if (filePath != null) {
+      xmlDoc = XmlDocument.parse(File(filePath!).readAsStringSync());
+      opafDoc.file = File(filePath!);
+    }
 
     if (xmlDoc.rootElement.name.local != 'pattern') {
       throw OPAFParserException("'pattern' root node not found in OPAF file");
@@ -130,7 +133,7 @@ class OPAFParser {
     var elements = root.findElements('opaf:define_image');
 
     for (var element in elements) {
-      var image = OPAFImage.parse(element, dir ?? p.dirname(filePath));
+      var image = OPAFImage.parse(element, dir ?? p.dirname(filePath ?? ''));
       opafDoc.addOpafImage(image);
     }
 
@@ -203,6 +206,14 @@ class OPAFParser {
     XmlElement root = doc == null ? xmlDoc.rootElement : doc.rootElement;
     var elements = root.findElements('opaf:include');
 
+    if (elements.isEmpty) {
+      return;
+    }
+
+    if (dir == null && filePath == null) {
+      throw OPAFParserException("A directory path is required to parse 'opaf:include' elements");
+    }
+
     for (var element in elements) {
       String? uri = element.getAttribute("uri");
 
@@ -211,7 +222,7 @@ class OPAFParser {
         continue;
       }
       
-      String? path = OPAFUtils.parseUri(uri, dir ?? p.dirname(filePath));
+      String? path = OPAFUtils.parseUri(uri, dir ?? p.dirname(filePath ?? ''));
 
       if (path == null) {
         throw OPAFParserException("Failed to find included file with uri: $uri");
