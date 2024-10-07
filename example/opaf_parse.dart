@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart' as args;
+import 'package:opaf/src/opaf_document.dart';
 
 import 'package:opaf/src/opaf_parser.dart';
 
@@ -26,7 +27,7 @@ void main(List<String> arguments) {
     printUsage();
   }
 
-  OPAFParser parser = OPAFParser(input);
+  OPAFParser parser = OPAFParser.fromFile(input, OPAFDocument());
 
   try {
     parser.initialize();
