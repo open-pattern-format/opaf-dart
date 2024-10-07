@@ -101,6 +101,7 @@ class OPAFUtils {
           "BOOL": OPAFFuncs.toBool,
           "IF": OPAFFuncs.ifElse,
           "MOD": OPAFFuncs.mod,
+          "REPT": OPAFFuncs.rept,
         };
         
         for (String s in values.keys) {

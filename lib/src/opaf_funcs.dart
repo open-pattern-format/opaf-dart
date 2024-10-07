@@ -156,4 +156,26 @@ class OPAFFuncs {
   static num mod(num val, num div) {
     return val % div;
   }
+
+  static String rept(dynamic str, int num, String sep) {
+    if (num <= 0) {
+      return '';
+    }
+
+    if (num == 1) {
+      return str.toString();
+    }
+
+    String result = '';
+
+    for (var i = 0; i < num; i++) {
+      result += str.toString();
+
+      if (i < (num - 1)) {
+        result += sep;
+      }
+    }
+
+    return result;
+  }
 }
