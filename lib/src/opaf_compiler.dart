@@ -227,6 +227,10 @@ class OPAFCompiler {
     builder.element("repeat", nest: () {
       builder.attribute('count', OPAFUtils.evaluateExpr(repeat.count, values));
 
+      if (OPAFUtils.isNullOrEmpty(repeat.title) != null) {
+        builder.attribute('title', OPAFUtils.evaluateExpr(repeat.title!, values));
+      }
+
       for (var n in nodes) {
         builder.xml(n.toXmlString());
       }

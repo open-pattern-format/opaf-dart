@@ -27,6 +27,7 @@ import 'text.dart';
 
 class PatternRepeat extends PatternElement {
 
+  String? title;
   String count;
   List<dynamic> elements;
 
@@ -35,6 +36,10 @@ class PatternRepeat extends PatternElement {
   void toXml(XmlBuilder builder) {
     builder.element("opaf:repeat", nest:() {
       builder.attribute("count", count);
+
+      if (title != null) {
+        builder.attribute("title", title);
+      }
 
       if (condition != null) {
         builder.attribute("condition", condition);
@@ -52,6 +57,7 @@ class PatternRepeat extends PatternElement {
       []
     );
 
+    newRepeat.title = title;
     newRepeat.condition = condition;
 
     for (var e in elements) {
@@ -75,6 +81,10 @@ class PatternRepeat extends PatternElement {
     }
   
     PatternRepeat repeat = PatternRepeat(node.getAttribute("count") as String, []);
+
+    if (node.getAttribute('title') != null) {
+      repeat.title = node.getAttribute("title") as String;
+    }
 
     if (node.getAttribute('condition') != null) {
       repeat.condition = node.getAttribute("condition") as String;
