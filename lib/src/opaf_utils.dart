@@ -51,26 +51,26 @@ class OPAFUtils {
   ];
 
 
-static String? parseUri(String uri, String? dir) {
-  var splitUri = uri.split('://');
+  static String? parseUri(String uri, String? dir) {
+    var splitUri = uri.split('://');
 
-  if (splitUri.length != 2) {
+    if (splitUri.length != 2) {
+      return null;
+    }
+
+    // Get absolute path
+    if (splitUri[0] == "file") {
+      File file = File(splitUri[1]);
+
+      if (file.isAbsolute) {
+        return file.absolute.path;
+      } else {
+        return dir == null ? file.absolute.path : p.join(dir, splitUri[1]);
+      }
+    }
+
     return null;
   }
-
-  // Get absolute path
-  if (splitUri[0] == "file") {
-    File file = File(splitUri[1]);
-
-    if (file.isAbsolute) {
-      return file.absolute.path;
-    } else {
-      return dir == null ? file.absolute.path : p.join(dir, splitUri[1]);
-    }
-  }
-
-  return null;
-}
 
 
   static String evaluateExpr(String expr, Map<String, dynamic> values) {
@@ -100,6 +100,7 @@ static String? parseUri(String uri, String? dir) {
           "MAX": OPAFFuncs.max,
           "BOOL": OPAFFuncs.toBool,
           "IF": OPAFFuncs.ifElse,
+          "MOD": OPAFFuncs.mod,
         };
         
         for (String s in values.keys) {

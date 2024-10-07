@@ -152,4 +152,8 @@ class OPAFFuncs {
 
     return valF;
   }
+
+  static num mod(num val, num div) {
+    return val % div;
+  }
 }
