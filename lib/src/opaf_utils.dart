@@ -145,7 +145,7 @@ class OPAFUtils {
     if (params.containsKey('color')) {
       var colors = doc.getOpafColors();
 
-      if (!colors.containsKey(params['color'])) {
+      if (!colors.containsKey(params['color'].toString())) {
         throw OPAFNotDefinedException("Color '$params['color]' is not defined");
       }
     }
