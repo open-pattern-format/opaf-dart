@@ -153,6 +153,19 @@ class OPAFCompiler {
         element.setAttribute(a, OPAFUtils.evaluateExpr(e.params[a], params));
       }
 
+      // Action attributes
+      if (a.params.containsKey('attrs')) {
+        List<String> attrs = a.params['attrs'].toString().split(',');
+
+        if (attrs.isNotEmpty) {
+          if (element.getAttribute('attrs') != null) {
+            attrs.addAll(element.getAttribute('attrs')!.split(','));
+          }
+
+          element.setAttribute('attrs', attrs.toSet().toList().join(','));
+        }
+      }
+
       // Chart attribute
       if (a.params.containsKey('chart')) {
         element.setAttribute('chart', OPAFUtils.evaluateExpr(a.params['chart'], params));
