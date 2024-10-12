@@ -208,7 +208,7 @@ class OPAFDocument {
       file?.copySync('${file?.path}.bak');
     }
 
-    file?.writeAsStringSync(toXml().toString());
+    file?.writeAsStringSync(toXml().toXmlString(pretty: true));
   }
 
   void package() {
