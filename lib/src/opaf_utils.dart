@@ -19,7 +19,6 @@ import 'dart:io';
 
 import 'package:opaf/opaf.dart';
 import 'package:path/path.dart' as p;
-import 'package:string_validator/string_validator.dart';
 import 'package:xml/xml.dart';
 import 'package:expressions/expressions.dart';
 

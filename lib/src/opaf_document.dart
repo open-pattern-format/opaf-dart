@@ -208,7 +208,18 @@ class OPAFDocument {
       file?.copySync('${file?.path}.bak');
     }
 
-    file?.writeAsStringSync(toXml().toXmlString(pretty: true));
+    file?.writeAsStringSync(toXml().toXmlString(
+      pretty: true,
+      preserveWhitespace: (value)  {
+        if (value.nodeType == XmlNodeType.ELEMENT) {
+          if (['description'].contains((value as XmlElement).localName)) {
+            return true;
+          }
+        }
+
+        return false;
+      },
+    ));
   }
 
   void package() {
