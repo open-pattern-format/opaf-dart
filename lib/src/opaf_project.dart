@@ -30,6 +30,7 @@ class OPAFProject {
   String uniqueId;
   Version specVersion;
   int progress = 0;
+  String notes;
   OPAFPattern? pattern;
   Map<String, String> config = {};
   List<OPAFImage> images = [];
@@ -43,6 +44,7 @@ class OPAFProject {
     this.uniqueId,
     this.specVersion,
     this.progress,
+    this.notes,
   );
 
   void parseConfig() {
@@ -166,6 +168,13 @@ class OPAFProject {
     }
   }
 
+  void updateNotes(String notes) {
+    var node = xmlDoc.rootElement;
+    this.notes = notes;
+    node.setAttribute('notes', notes);
+  }
+
+
   void saveToFile() {
     file?.writeAsStringSync(xmlDoc.toString());
   }
@@ -204,7 +213,10 @@ class OPAFProject {
 
     // Progress
     int? progress = int.tryParse(node.getAttribute("progress") ?? '0');
+
+    // Notes
+    String notes = node.getAttribute("notes") ?? '';
     
-    return OPAFProject(file, doc, name, uniqueId, specVersion, progress ?? 0);
+    return OPAFProject(file, doc, name, uniqueId, specVersion, progress ?? 0, notes);
   }
 }
