@@ -51,4 +51,4 @@ export 'src/pattern/row.dart' show ChartRow;
 export 'src/pattern/text.dart' show PatternText;
 
 final String libVersion = "0.6.0";
-final String supportedSpec = "1.5";
+final String supportedSpec = "1.6";
