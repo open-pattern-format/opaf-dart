@@ -383,4 +383,12 @@ class OPAFUtils {
 
     return test;
   }
+
+  static bool checkActionChart(String chart, List<String>? charts) {
+    if (charts == null) return false;
+    if (charts.isEmpty) return false;
+    if (chart.isEmpty) return false;
+
+    return charts.contains(chart.split(':')[0]);
+  }
 }

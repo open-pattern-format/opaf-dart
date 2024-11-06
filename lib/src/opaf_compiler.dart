@@ -35,6 +35,9 @@ class OPAFCompiler {
   Map<String, dynamic> customConfig = {};
   Map<String, dynamic> globalValues = {};
 
+  // Compile index
+  Map<String, List<String>> index = {};
+
   OPAFCompiler(this.opafDoc, this.customConfig);
 
   List<XmlElement> processConfigs() {
@@ -168,7 +171,14 @@ class OPAFCompiler {
 
       // Chart attribute
       if (a.params.containsKey('chart')) {
-        element.setAttribute('chart', OPAFUtils.evaluateExpr(a.params['chart'], params));
+        String chart = OPAFUtils.evaluateExpr(a.params['chart'], params);
+
+        // Check chart
+        if (!OPAFUtils.checkActionChart(chart, index['chart'])) {
+          throw OPAFNotDefinedException("Chart '$chart' is referenced in the pattern but is not defined or is omitted based on conditions");
+        }
+
+        element.setAttribute('chart', chart);
       }
       
       nodes.add(element);
@@ -388,6 +398,9 @@ class OPAFCompiler {
       throw OPAFInvalidException("'name' not provided in custom configuration");
     }
 
+    // Reset index
+    index = {};
+
     final builder = XmlBuilder();
 
     // Set root element
@@ -437,10 +450,21 @@ class OPAFCompiler {
       }
 
       // Process charts
+      index['chart'] = [];
+
       for (var chart in opafDoc.opafCharts) {
+        if (chart.condition != null) {
+          if (!OPAFUtils.evaluateCondition(chart.condition as String, globalValues)) {
+            continue;
+          }
+        }
+
         for (var x in processChart(chart)) {
           builder.xml(x.toXmlString());
         }
+
+        // Add chart index
+        index['chart']?.add(chart.name);
       }
 
       // Process components

@@ -31,8 +31,9 @@ class OPAFChart {
 
   String name;
   List<ChartRow> rows;
+  String? condition;
 
-  OPAFChart(this.name, this.rows);
+  OPAFChart(this.name, this.rows, this.condition);
 
   static OPAFChart parse(XmlElement node) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
@@ -53,6 +54,7 @@ class OPAFChart {
     OPAFChart chart = OPAFChart(
       node.getAttribute("name") as String,
       [],
+      node.getAttribute('condition'),
     );
     
     // Rows
