@@ -37,6 +37,7 @@ class OPAFMetadata {
   String? copyright = '';
   String? description;
   String? published;
+  String? changelog;
   List<String> tags = [];
   List<MetadataImage> images = [];
   List<Link> links = [];
@@ -74,6 +75,12 @@ class OPAFMetadata {
     if (published != null) {
       builder.element("published", nest:() {
         builder.text(published as String);
+      });
+    }
+
+    if (changelog != null) {
+      builder.element("changelog", nest:() {
+        builder.text(changelog as String);
       });
     }
 
@@ -156,6 +163,11 @@ class OPAFMetadata {
       // Published
       if (e.localName == 'published') {
         metadata.published= e.innerText;
+      }
+
+      // Changelog
+      if (e.localName == 'changelog') {
+        metadata.changelog = e.innerText;
       }
 
       // Copyright

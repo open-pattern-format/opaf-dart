@@ -212,7 +212,7 @@ class OPAFDocument {
       pretty: true,
       preserveWhitespace: (value)  {
         if (value.nodeType == XmlNodeType.ELEMENT) {
-          if (['description'].contains((value as XmlElement).localName)) {
+          if (['description', 'changelog'].contains((value as XmlElement).localName)) {
             return true;
           }
         }

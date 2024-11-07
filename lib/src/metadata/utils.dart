@@ -24,6 +24,7 @@ import 'note.dart';
 class MetadataUtils {
 
   static final supportedNodes = [
+      'changelog',
       'color',
       'copyright',
       'description',
