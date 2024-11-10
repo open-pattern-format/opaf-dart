@@ -171,7 +171,7 @@ class OPAFCompiler {
 
       // Chart attribute
       if (a.params.containsKey('chart')) {
-        String chart = OPAFUtils.evaluateExpr(a.params['chart'], params);
+        String chart = OPAFUtils.evaluateExpr(a.params['chart'], values);
 
         // Check chart
         if (!OPAFUtils.checkActionChart(chart, index['chart'])) {
