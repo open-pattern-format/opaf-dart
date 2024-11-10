@@ -155,6 +155,10 @@ class OPAFDocument {
         builder.element('opaf:define_chart', nest: () {
           builder.attribute('name', c.name);
 
+          if (c.condition != null) {
+            builder.attribute('condition', c.condition);
+          }
+
           for (var r in c.rows) {
             r.toXml(builder);
           }
