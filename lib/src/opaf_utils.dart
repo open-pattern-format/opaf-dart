@@ -340,7 +340,10 @@ class OPAFUtils {
     return maxCount;
   }
 
-  static OPAFImage? getImageByName(List<OPAFImage> images, String name) {
+  static OPAFImage? getImageByName(List<OPAFImage> images, String? name) {
+    if (name == null) return null;
+    if (name.isEmpty) return null;
+    
     for (var i in images) {
       if (i.name == name) {
         return i;
