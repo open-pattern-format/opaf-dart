@@ -10,8 +10,8 @@ environment:
   sdk: '>=3.2.6 <4.0.0'
 
 dependencies:
-  expressions: ^0.2.5+1
-  image: ^4.2.0
+  expressions: ^0.2.5+2
+  image: ^4.5.2
   path: ^1.8.3
   string_validator: ^1.0.2
   uuid: ^4.3.3
