@@ -33,6 +33,7 @@ class PatternRepeat extends PatternElement {
 
   PatternRepeat(this.count, this.elements);
 
+  @override
   void toXml(XmlBuilder builder) {
     builder.element("opaf:repeat", nest:() {
       builder.attribute("count", count);

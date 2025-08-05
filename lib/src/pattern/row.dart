@@ -29,6 +29,7 @@ class ChartRow extends PatternElement {
 
   ChartRow(this.type, this.elements);
 
+  @override
   void toXml(XmlBuilder builder) {
     builder.element("opaf:row", nest:() {
       builder.attribute("type", type);

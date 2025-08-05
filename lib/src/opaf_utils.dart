@@ -22,11 +22,7 @@ import 'package:path/path.dart' as p;
 import 'package:xml/xml.dart';
 import 'package:expressions/expressions.dart';
 
-import 'opaf_color.dart';
-import 'opaf_document.dart';
 import 'opaf_exceptions.dart';
-import 'opaf_image.dart';
-import 'opaf_funcs.dart';
 
 
 class OPAFUtils {

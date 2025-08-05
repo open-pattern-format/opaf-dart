@@ -25,6 +25,7 @@ class PatternText extends PatternElement {
 
   PatternText(this.data);
 
+  @override
   void toXml(XmlBuilder builder) {
     builder.element("opaf:text", nest:() {
       builder.attribute("data", data);

@@ -27,6 +27,7 @@ class PatternBlock extends PatternElement {
 
   PatternBlock(this.name, this.params);
 
+  @override
   void toXml(XmlBuilder builder) {
     builder.element("opaf:block", nest:() {
       builder.attribute("name", name);

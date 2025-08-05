@@ -30,6 +30,7 @@ class PatternInstruction extends PatternElement {
 
   PatternInstruction(this.name, this.elements);
 
+  @override
   void toXml(XmlBuilder builder) {
     builder.element("opaf:instruction", nest:() {
       if (name != null) {

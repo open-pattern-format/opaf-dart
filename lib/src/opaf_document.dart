@@ -49,7 +49,7 @@ class OPAFDocument {
     builder.processing('xml', 'version="1.0"');
     builder.element('pattern', nest: () {
       builder.attribute('version', version.toString());
-      builder.namespace(opafNamespace as String, 'opaf');
+      builder.namespace(opafNamespace, 'opaf');
 
       if (name.isNotEmpty) {
         builder.attribute('name', name);
@@ -231,9 +231,9 @@ class OPAFDocument {
       return;
     }
 
-    String path = '${withoutExtension(file!.path)}_${version}.opafpkg';
-    File package_file = File(path);
-    package_file.writeAsStringSync(toXml(package: true).toString());
+    String path = '${withoutExtension(file!.path)}_$version.opafpkg';
+    File packageFile = File(path);
+    packageFile.writeAsStringSync(toXml(package: true).toString());
   }
 
   void addOpafColor(OPAFColor color) {

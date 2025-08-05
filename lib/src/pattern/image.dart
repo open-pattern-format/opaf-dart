@@ -26,6 +26,7 @@ class PatternImage extends PatternElement {
 
   PatternImage(this.name);
 
+  @override
   void toXml(XmlBuilder builder) {
     builder.element("opaf:image", nest:() {
       builder.attribute("name", name);
