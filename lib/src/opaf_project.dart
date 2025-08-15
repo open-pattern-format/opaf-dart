@@ -141,21 +141,19 @@ class OPAFProject {
 
       rs.addAll(c.findAllElements('instruction'));
 
-      if (rs.isEmpty) {
-        continue;
-      }
-
-      for (var r in rs) {
-        if (r.getAttribute('completed') != null) {
-          if (toBoolean(r.getAttribute('completed'))) {
-            count += 1;
+      if (rs.isNotEmpty) {
+        for (var r in rs) {
+          if (r.getAttribute('completed') != null) {
+            if (toBoolean(r.getAttribute('completed'))) {
+              count += 1;
+            }
           }
         }
-      }
 
-      // Update global variables
-      ros.addAll(rs);
-      mCount += count;
+        // Update global variables
+        ros.addAll(rs);
+        mCount += count;
+      }
 
       // Update component
       c.setAttribute('completed', (count == rs.length).toString());
