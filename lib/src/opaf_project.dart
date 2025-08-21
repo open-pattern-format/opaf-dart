@@ -129,41 +129,70 @@ class OPAFProject {
     }
   }
 
+  (int, int) getInstructionCount(XmlElement c) {
+    int tCount = 0;
+    int cCount = 0;
+
+    for (var e in c.childElements) {
+      if (e.localName == 'instruction') {
+        if (e.getAttribute('completed') == null ? false : toBoolean(e.getAttribute('completed') as String)) {
+          cCount += 1;
+        }
+        
+        tCount += 1;
+      }
+
+      if (e.localName == 'repeat') {
+        // Get repeat counters
+        int rCount = int.tryParse(e.getAttribute('count') == null ? '0' : e.getAttribute('count') as String) ?? 0;
+        int dCount = int.tryParse(e.getAttribute('counter') == null ? '0' : e.getAttribute('counter') as String) ?? 0;
+
+        int rtCount = 0;
+        int rcCount = 0;
+
+        (rtCount, rcCount) = getInstructionCount(e);
+
+        if (rCount < 2) {
+          tCount += rtCount;
+          cCount += rcCount;
+        } else {
+          tCount += (rCount * rtCount);
+
+          if (rCount == dCount) {
+            cCount += (dCount * rtCount);
+          } else {
+            cCount += (dCount * rtCount) + rcCount;
+          }
+        }
+      }
+    }
+
+    return (tCount, cCount);
+  }
+
   void updateProgress() {
     var node = xmlDoc.rootElement;
 
-    var ros = [];
-    var mCount = 0;
+    var cCount = 0;
+    var tCount = 0;
 
     for (var c in node.findElements('component')) {
-      int count = 0;
-      var rs = [];
+      int _cCount = 0;
+      int _tCount = 0;
 
-      rs.addAll(c.findAllElements('instruction'));
+      (_tCount, _cCount) = getInstructionCount(c);
 
-      if (rs.isNotEmpty) {
-        for (var r in rs) {
-          if (r.getAttribute('completed') != null) {
-            if (toBoolean(r.getAttribute('completed'))) {
-              count += 1;
-            }
-          }
-        }
-
-        // Update global variables
-        ros.addAll(rs);
-        mCount += count;
-      }
+      // Update totals
+      tCount += _tCount;
+      cCount += _cCount;
 
       // Update component
-      c.setAttribute('completed', (count == rs.length).toString());
+      c.setAttribute('completed', (_tCount == _cCount).toString());
     }
 
     // Calculate overall progress
-    if (ros.isNotEmpty) {
-      progress = ((100 / ros.length) * mCount).round();
-      node.setAttribute('progress', progress.toString());
-    }
+    progress = ((100 / tCount) * cCount).round();
+    node.setAttribute('progress', progress.toString());
   }
 
   void updateNotes(String notes) {
