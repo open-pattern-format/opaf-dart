@@ -177,17 +177,17 @@ class OPAFProject {
     var tCount = 0;
 
     for (var c in node.findElements('component')) {
-      int _cCount = 0;
-      int _tCount = 0;
+      int ccCount = 0;
+      int ctCount = 0;
 
-      (_tCount, _cCount) = getInstructionCount(c);
+      (ctCount, ccCount) = getInstructionCount(c);
 
       // Update totals
-      tCount += _tCount;
-      cCount += _cCount;
+      tCount += ctCount;
+      cCount += ccCount;
 
       // Update component
-      c.setAttribute('completed', (_tCount == _cCount).toString());
+      c.setAttribute('completed', (ctCount == ccCount).toString());
     }
 
     // Calculate overall progress
