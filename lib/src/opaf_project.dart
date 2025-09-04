@@ -150,6 +150,10 @@ class OPAFProject {
         int rtCount = 0;
         int rcCount = 0;
 
+        if (rCount < 0) {
+          continue;
+        }
+
         (rtCount, rcCount) = getInstructionCount(e);
 
         if (rCount < 2) {
